@@ -3,11 +3,13 @@ package main
 import (
 	"fmt"
 	"net/http"
+
+	log "github.com/sirupsen/logrus"
+
+	repo "taskWorker/Repo"
 	"taskWorker/application"
 	"taskWorker/common"
 	"taskWorker/server"
-
-	log "github.com/sirupsen/logrus"
 )
 
 func main() {
@@ -20,6 +22,14 @@ func main() {
 	app := application.App{
 		Config: cfg,
 	}
+
+	log.Info("Connecting to local repo")
+	r, err := repo.NewRepo(app.Config)
+	if nil != err {
+		panic(fmt.Errorf("cannot connect to MYSQL server: %w", err))
+	}
+
+	app.Repo = r
 
 	log.WithField("Port", app.Config.Port).Info("Starting server")
 	panic(http.ListenAndServe(fmt.Sprintf(":%d", app.Config.Port), server.NewServer()))

@@ -5,7 +5,6 @@ import (
 	"strings"
 
 	"github.com/caarlos0/env"
-
 	_ "github.com/joho/godotenv/autoload"
 )
 
