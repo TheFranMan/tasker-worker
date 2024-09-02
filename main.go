@@ -30,6 +30,7 @@ func main() {
 	}
 
 	app.Repo = r
+	fmt.Println(app.Repo.GetAll())
 
 	log.WithField("Port", app.Config.Port).Info("Starting server")
 	panic(http.ListenAndServe(fmt.Sprintf(":%d", app.Config.Port), server.NewServer()))
