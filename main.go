@@ -10,13 +10,12 @@ import (
 )
 
 func main() {
-	env, err := common.GetEnv()
+	log.Info("Retrieving configuration")
+	cfg, err := common.GetConfig()
 	if nil != err {
 		panic(fmt.Errorf("cannot get env variables: %w", err))
 	}
 
-	log.WithField("Port", env.Port).Info("Starting server")
-	panic(http.ListenAndServe(fmt.Sprintf(":%d", env.Port), server.NewServer()))
-
-	fmt.Printf("%+v\n", env)
+	log.WithField("Port", cfg.Port).Info("Starting server")
+	panic(http.ListenAndServe(fmt.Sprintf(":%d", cfg.Port), server.NewServer()))
 }

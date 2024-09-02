@@ -89,7 +89,7 @@ func TestConfig(t *testing.T) {
 			t.Run(test.env, func(t *testing.T) {
 				os.Setenv("ENV", test.env)
 
-				cfg, err := GetEnv()
+				cfg, err := GetConfig()
 				require.Nil(t, err)
 
 				require.Equal(t, test.want.isLocal, cfg.isLocal)

@@ -27,7 +27,7 @@ type Config struct {
 	DbName string `env:"DB_NAME"`
 }
 
-func GetEnv() (*Config, error) {
+func GetConfig() (*Config, error) {
 	var config Config
 	err := env.Parse(&config)
 	if nil != err {
