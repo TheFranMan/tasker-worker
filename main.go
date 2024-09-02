@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"taskWorker/application"
 	"taskWorker/common"
 	"taskWorker/server"
 
@@ -16,6 +17,10 @@ func main() {
 		panic(fmt.Errorf("cannot get env variables: %w", err))
 	}
 
-	log.WithField("Port", cfg.Port).Info("Starting server")
-	panic(http.ListenAndServe(fmt.Sprintf(":%d", cfg.Port), server.NewServer()))
+	app := application.App{
+		Config: cfg,
+	}
+
+	log.WithField("Port", app.Config.Port).Info("Starting server")
+	panic(http.ListenAndServe(fmt.Sprintf(":%d", app.Config.Port), server.NewServer()))
 }
