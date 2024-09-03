@@ -24,6 +24,8 @@ type Config struct {
 	DbHost string `env:"DB_HOST"`
 	DbPort string `env:"DB_PORT"`
 	DbName string `env:"DB_NAME"`
+
+	StartWorkers bool `env:"START_WORKERS" envDefault:"true"`
 }
 
 func GetConfig() (*Config, error) {
