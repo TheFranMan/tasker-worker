@@ -11,8 +11,14 @@ import (
 	"taskWorker/common"
 )
 
+type requestStatus int
+
+var (
+	requestStatusNew requestStatus = 0
+)
+
 type Interface interface {
-	GetAll() ([]Request, error)
+	GetNewRequests() ([]Request, error)
 }
 
 type Request struct {
@@ -45,9 +51,13 @@ func NewRepo(config *common.Config) (*Repo, error) {
 	return &Repo{db}, nil
 }
 
-func (r *Repo) GetAll() ([]Request, error) {
+func (r *Repo) GetNewRequests() ([]Request, error) {
+	return r.getRequests(requestStatusNew)
+}
+
+func (r *Repo) getRequests(status requestStatus) ([]Request, error) {
 	var requests []Request
-	err := r.db.Select(&requests, "SELECT token, request_token, action, params, extras, controller, step, status, created, completed FROM requests")
+	err := r.db.Select(&requests, "SELECT token, request_token, action, params, extras, controller, step, status, created, completed FROM requests WHERE status = ?", int(status))
 	if nil != err {
 		return nil, err
 	}
