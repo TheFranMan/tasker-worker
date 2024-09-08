@@ -1,8 +1,8 @@
 package application
 
 import (
-	repo "taskWorker/Repo"
 	"taskWorker/common"
+	"taskWorker/repo"
 )
 
 type App struct {

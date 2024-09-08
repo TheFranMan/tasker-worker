@@ -2,10 +2,12 @@ package repo
 
 import (
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"time"
 
 	_ "github.com/go-sql-driver/mysql"
+	sqlb "github.com/huandu/go-sqlbuilder"
 	"github.com/jmoiron/sqlx"
 
 	"taskWorker/common"
@@ -19,19 +21,60 @@ var (
 
 type Interface interface {
 	GetNewRequests() ([]Request, error)
+	InsertJobs(jobDetails []JobDetails) error
 }
 
 type Request struct {
 	Token        string         `db:"token"`
 	RequestToken string         `db:"request_token"`
 	Action       string         `db:"action"`
-	Params       string         `db:"params"`
+	Params       Params         `db:"params"`
 	Extras       sql.NullString `db:"extras"`
-	Controller   string         `db:"controller"`
+	Steps        Steps          `db:"steps"`
 	Step         int            `db:"step"`
 	Status       int            `db:"status"`
 	Created      time.Time      `db:"created"`
 	Completed    sql.NullTime   `db:"completed"`
+}
+
+type Job struct {
+	ID           int          `db:"id"`
+	Name         string       `db:"name"`
+	RequestToken string       `db:"request_token"`
+	Step         int          `db:"step"`
+	Status       int          `db:"status"`
+	Created      time.Time    `db:"created"`
+	Completed    sql.NullTime `db:"complete"`
+}
+
+type Params struct {
+	ID    int    `json:"id"`
+	Email string `json:"email"`
+}
+
+func (p *Params) Scan(value interface{}) error {
+	if nil == value {
+		p = &Params{}
+		return nil
+	}
+
+	return json.Unmarshal(value.([]byte), p)
+}
+
+type Step struct {
+	Name string   `json:"name"`
+	Jobs []string `json:"jobs"`
+}
+
+type Steps []Step
+
+func (s *Steps) Scan(value interface{}) error {
+	if nil == value {
+		s = &Steps{}
+		return nil
+	}
+
+	return json.Unmarshal(value.([]byte), s)
 }
 
 type Repo struct {
@@ -57,10 +100,29 @@ func (r *Repo) GetNewRequests() ([]Request, error) {
 
 func (r *Repo) getRequests(status requestStatus) ([]Request, error) {
 	var requests []Request
-	err := r.db.Select(&requests, "SELECT token, request_token, action, params, extras, controller, step, status, created, completed FROM requests WHERE status = ?", int(status))
+	err := r.db.Select(&requests, "SELECT token, request_token, action, params, extras, steps, step, status, created, completed FROM requests WHERE status = ?", int(status))
 	if nil != err {
 		return nil, err
 	}
 
 	return requests, nil
+}
+
+type JobDetails struct {
+	Token string
+	Name  string
+	Step  int
+}
+
+func (r *Repo) InsertJobs(jobDetails []JobDetails) error {
+	ib := sqlb.NewInsertBuilder()
+	ib.InsertInto("jobs")
+	ib.Cols("token", "name", "step", "status", "created")
+	for _, jobDetail := range jobDetails {
+		ib.Values(jobDetail.Token, jobDetail.Name, jobDetail.Step, 0, sqlb.Raw("NOW()"))
+	}
+
+	sql, args := ib.Build()
+	_, err := r.db.Exec(sql, args...)
+	return err
 }

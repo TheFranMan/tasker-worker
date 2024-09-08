@@ -6,9 +6,9 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	repo "taskWorker/Repo"
 	"taskWorker/application"
 	"taskWorker/common"
+	repo "taskWorker/repo"
 	"taskWorker/server"
 )
 
