@@ -8,16 +8,16 @@ import (
 	"taskWorker/repo"
 )
 
-func StartWrkProcessor(app *App) {
-	log.Info("Starting worker processor")
+func StartRequestWrk(app *App) {
+	log.Info("Starting request worker")
 
-	err := startProcessor(app)
+	err := processNewRequests(app)
 	if nil != err {
 		log.WithError(err).Error("cannot start processing new requests")
 	}
 }
 
-func startProcessor(app *App) error {
+func processNewRequests(app *App) error {
 	requests, err := app.Repo.GetNewRequests()
 	if nil != err {
 		return err

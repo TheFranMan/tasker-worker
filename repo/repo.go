@@ -14,13 +14,17 @@ import (
 )
 
 type requestStatus int
+type jobStatus int
 
 var (
 	requestStatusNew requestStatus = 0
+
+	jobStatusNew jobStatus = 0
 )
 
 type Interface interface {
 	GetNewRequests() ([]Request, error)
+	GetNewJobs() ([]Job, error)
 	InsertJobs(jobDetails []JobDetails) error
 }
 
@@ -38,13 +42,13 @@ type Request struct {
 }
 
 type Job struct {
-	ID           int          `db:"id"`
-	Name         string       `db:"name"`
-	RequestToken string       `db:"request_token"`
-	Step         int          `db:"step"`
-	Status       int          `db:"status"`
-	Created      time.Time    `db:"created"`
-	Completed    sql.NullTime `db:"complete"`
+	ID        int          `db:"id"`
+	Name      string       `db:"name"`
+	Token     string       `db:"token"`
+	Step      int          `db:"step"`
+	Status    int          `db:"status"`
+	Created   time.Time    `db:"created"`
+	Completed sql.NullTime `db:"complete"`
 }
 
 type Params struct {
@@ -125,4 +129,18 @@ func (r *Repo) InsertJobs(jobDetails []JobDetails) error {
 	sql, args := ib.Build()
 	_, err := r.db.Exec(sql, args...)
 	return err
+}
+
+func (r *Repo) GetNewJobs() ([]Job, error) {
+	return r.getJobs(jobStatusNew)
+}
+
+func (r *Repo) getJobs(status jobStatus) ([]Job, error) {
+	var jobs []Job
+	err := r.db.Select(&jobs, "SELECT id, name FROM jobs WHERE status = 0")
+	if nil != err {
+		return nil, fmt.Errorf("cannot select new jobs: %w", err)
+	}
+
+	return jobs, nil
 }

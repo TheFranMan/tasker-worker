@@ -32,7 +32,8 @@ func main() {
 	app.Repo = r
 
 	if app.Config.StartWorkers {
-		go application.StartWrkProcessor(&app)
+		go application.StartRequestWrk(&app)
+		go application.StartJobWrk(&app)
 	}
 
 	log.WithField("Port", app.Config.Port).Info("Starting server")
