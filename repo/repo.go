@@ -19,13 +19,16 @@ type jobStatus int
 var (
 	requestStatusNew requestStatus = 0
 
-	jobStatusNew jobStatus = 0
+	jobStatusNew        jobStatus = 0
+	jobStatusInProgress jobStatus = 1
 )
 
 type Interface interface {
 	GetNewRequests() ([]Request, error)
 	GetNewJobs() ([]Job, error)
 	InsertJobs(jobDetails []JobDetails) error
+	GetRequest(token string) (*Request, error)
+	MarkJobsInprogress(id int) error
 }
 
 type Request struct {
@@ -137,10 +140,25 @@ func (r *Repo) GetNewJobs() ([]Job, error) {
 
 func (r *Repo) getJobs(status jobStatus) ([]Job, error) {
 	var jobs []Job
-	err := r.db.Select(&jobs, "SELECT id, name FROM jobs WHERE status = 0")
+	err := r.db.Select(&jobs, "SELECT id, name, token FROM jobs WHERE status = ?", status)
 	if nil != err {
 		return nil, fmt.Errorf("cannot select new jobs: %w", err)
 	}
 
 	return jobs, nil
+}
+
+func (r *Repo) GetRequest(token string) (*Request, error) {
+	var request Request
+	err := r.db.Get(&request, "SELECT * FROM requests WHERE token = ?", token)
+	return &request, err
+}
+
+func (r *Repo) MarkJobsInprogress(id int) error {
+	return r.updateJobStatus(id, jobStatusInProgress)
+}
+
+func (r *Repo) updateJobStatus(id int, status jobStatus) error {
+	_, err := r.db.Exec("UPDATE jobs SET status = ? WHERE id = ?", status, id)
+	return err
 }

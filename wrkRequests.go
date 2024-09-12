@@ -1,14 +1,15 @@
-package application
+package main
 
 import (
 	"fmt"
 
 	log "github.com/sirupsen/logrus"
 
+	"taskWorker/application"
 	"taskWorker/repo"
 )
 
-func StartRequestWrk(app *App) {
+func startRequestWrk(app *application.App) {
 	log.Info("Starting request worker")
 
 	err := processNewRequests(app)
@@ -17,7 +18,7 @@ func StartRequestWrk(app *App) {
 	}
 }
 
-func processNewRequests(app *App) error {
+func processNewRequests(app *application.App) error {
 	requests, err := app.Repo.GetNewRequests()
 	if nil != err {
 		return err
