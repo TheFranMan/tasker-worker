@@ -8,7 +8,7 @@ import (
 
 	"taskWorker/application"
 	"taskWorker/common"
-	repo "taskWorker/repo"
+	"taskWorker/repo"
 	"taskWorker/server"
 )
 
