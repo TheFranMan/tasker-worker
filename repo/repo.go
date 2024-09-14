@@ -21,6 +21,7 @@ var (
 
 	jobStatusNew        jobStatus = 0
 	jobStatusInProgress jobStatus = 1
+	jobStatusCompleted  jobStatus = 2
 )
 
 type Interface interface {
@@ -29,6 +30,8 @@ type Interface interface {
 	InsertJobs(jobDetails []JobDetails) error
 	GetRequest(token string) (*Request, error)
 	MarkJobsInprogress(id int) error
+	SaveExtra(key, value, token string) error
+	JobCompleted(id int) error
 }
 
 type Request struct {
@@ -159,6 +162,16 @@ func (r *Repo) MarkJobsInprogress(id int) error {
 }
 
 func (r *Repo) updateJobStatus(id int, status jobStatus) error {
+	// Todo: If job is completed update the completed time as well
 	_, err := r.db.Exec("UPDATE jobs SET status = ? WHERE id = ?", status, id)
 	return err
+}
+
+func (r *Repo) SaveExtra(key, value, token string) error {
+	_, err := r.db.Exec(fmt.Sprintf("UPDATE requests SET extras = JSON_SET(extras, '$.%s', ?) WHERE token = ?", key), value, token)
+	return err
+}
+
+func (r *Repo) JobCompleted(id int) error {
+	return r.updateJobStatus(id, jobStatusCompleted)
 }
