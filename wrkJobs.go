@@ -60,7 +60,7 @@ func processNewJobs(app *application.App) error {
 
 		tryErr := func() error {
 			// Update job status
-			err := app.Repo.MarkJobsInprogress(job.ID)
+			err := app.Repo.MarkJobInprogress(job.ID)
 			if nil != err {
 				return fmt.Errorf("cannot update job %d status to inprogress: %w", job.ID, err)
 			}

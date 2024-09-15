@@ -16,25 +16,10 @@ import (
 type requestStatus int
 type jobStatus int
 
-var (
-	requestStatusNew        requestStatus = 0
-	requestStatusInProgress requestStatus = 1
-
-	jobStatusNew        jobStatus = 0
-	jobStatusInProgress jobStatus = 1
-	jobStatusCompleted  jobStatus = 2
-)
-
-type Interface interface {
-	GetNewRequests() ([]Request, error)
-	GetNewJobs() ([]Job, error)
-	InsertJobs(jobDetails []JobDetails) error
-	GetRequest(token string) (*Request, error)
-	MarkJobsInprogress(id int) error
-	SaveExtra(key, value, token string) error
-	JobCompleted(id int) error
-	MarkRequestInProgress(token string) error
-	MarkJobNew(id int) error
+type JobDetails struct {
+	Token string
+	Name  string
+	Step  int
 }
 
 type Request struct {
@@ -74,12 +59,11 @@ func (p *Params) Scan(value interface{}) error {
 	return json.Unmarshal(value.([]byte), p)
 }
 
+type Steps []Step
 type Step struct {
 	Name string   `json:"name"`
 	Jobs []string `json:"jobs"`
 }
-
-type Steps []Step
 
 func (s *Steps) Scan(value interface{}) error {
 	if nil == value {
@@ -88,6 +72,27 @@ func (s *Steps) Scan(value interface{}) error {
 	}
 
 	return json.Unmarshal(value.([]byte), s)
+}
+
+var (
+	requestStatusNew        requestStatus = 0
+	requestStatusInProgress requestStatus = 1
+
+	jobStatusNew        jobStatus = 0
+	jobStatusInProgress jobStatus = 1
+	jobStatusCompleted  jobStatus = 2
+)
+
+type Interface interface {
+	GetNewRequests() ([]Request, error)
+	GetRequest(token string) (*Request, error)
+	SaveExtra(key, value, token string) error
+	GetNewJobs() ([]Job, error)
+	InsertJobs(jobDetails []JobDetails) error
+	MarkRequestInProgress(token string) error
+	MarkJobNew(id int) error
+	MarkJobInprogress(id int) error
+	MarkJobCompleted(id int) error
 }
 
 type Repo struct {
@@ -111,20 +116,10 @@ func (r *Repo) GetNewRequests() ([]Request, error) {
 	return r.getRequests(requestStatusNew)
 }
 
-func (r *Repo) getRequests(status requestStatus) ([]Request, error) {
-	var requests []Request
-	err := r.db.Select(&requests, "SELECT token, request_token, action, params, extras, steps, step, status, created, completed FROM requests WHERE status = ?", int(status))
-	if nil != err {
-		return nil, err
-	}
-
-	return requests, nil
-}
-
-type JobDetails struct {
-	Token string
-	Name  string
-	Step  int
+func (r *Repo) GetRequest(token string) (*Request, error) {
+	var request Request
+	err := r.db.Get(&request, "SELECT * FROM requests WHERE token = ?", token)
+	return &request, err
 }
 
 func (r *Repo) InsertJobs(jobDetails []JobDetails) error {
@@ -140,28 +135,44 @@ func (r *Repo) InsertJobs(jobDetails []JobDetails) error {
 	return err
 }
 
+func (r *Repo) SaveExtra(key, value, token string) error {
+	_, err := r.db.Exec(fmt.Sprintf("UPDATE requests SET extras = JSON_SET(extras, '$.%s', ?) WHERE token = ?", key), value, token)
+	return err
+}
+
+func (r *Repo) MarkRequestInProgress(token string) error {
+	return r.updateRequestStatus(token, requestStatusInProgress)
+}
+
 func (r *Repo) GetNewJobs() ([]Job, error) {
 	return r.getJobs(jobStatusNew)
 }
 
-func (r *Repo) getJobs(status jobStatus) ([]Job, error) {
-	var jobs []Job
-	err := r.db.Select(&jobs, "SELECT id, name, token FROM jobs WHERE status = ?", status)
+func (r *Repo) MarkJobNew(id int) error {
+	return r.updateJobStatus(id, jobStatusNew)
+}
+
+func (r *Repo) MarkJobInprogress(id int) error {
+	return r.updateJobStatus(id, jobStatusInProgress)
+}
+
+func (r *Repo) MarkJobCompleted(id int) error {
+	return r.updateJobStatus(id, jobStatusCompleted)
+}
+
+func (r *Repo) getRequests(status requestStatus) ([]Request, error) {
+	var requests []Request
+	err := r.db.Select(&requests, "SELECT token, request_token, action, params, extras, steps, step, status, created, completed FROM requests WHERE status = ?", int(status))
 	if nil != err {
-		return nil, fmt.Errorf("cannot select new jobs: %w", err)
+		return nil, err
 	}
 
-	return jobs, nil
+	return requests, nil
 }
 
-func (r *Repo) GetRequest(token string) (*Request, error) {
-	var request Request
-	err := r.db.Get(&request, "SELECT * FROM requests WHERE token = ?", token)
-	return &request, err
-}
-
-func (r *Repo) MarkJobsInprogress(id int) error {
-	return r.updateJobStatus(id, jobStatusInProgress)
+func (r *Repo) updateRequestStatus(token string, status requestStatus) error {
+	_, err := r.db.Exec("UPDATE requests SET status = ? WHERE token = ?", status, token)
+	return err
 }
 
 func (r *Repo) updateJobStatus(id int, status jobStatus) error {
@@ -185,24 +196,12 @@ func (r *Repo) updateJobStatus(id int, status jobStatus) error {
 	return err
 }
 
-func (r *Repo) SaveExtra(key, value, token string) error {
-	_, err := r.db.Exec(fmt.Sprintf("UPDATE requests SET extras = JSON_SET(extras, '$.%s', ?) WHERE token = ?", key), value, token)
-	return err
-}
+func (r *Repo) getJobs(status jobStatus) ([]Job, error) {
+	var jobs []Job
+	err := r.db.Select(&jobs, "SELECT id, name, token FROM jobs WHERE status = ?", status)
+	if nil != err {
+		return nil, fmt.Errorf("cannot select new jobs: %w", err)
+	}
 
-func (r *Repo) JobCompleted(id int) error {
-	return r.updateJobStatus(id, jobStatusCompleted)
-}
-
-func (r *Repo) MarkJobNew(id int) error {
-	return r.updateJobStatus(id, jobStatusNew)
-}
-
-func (r *Repo) MarkRequestInProgress(token string) error {
-	return r.updateRequestStatus(token, requestStatusInProgress)
-}
-
-func (r *Repo) updateRequestStatus(token string, status requestStatus) error {
-	_, err := r.db.Exec("UPDATE requests SET status = ? WHERE token = ?", status, token)
-	return err
+	return jobs, nil
 }
