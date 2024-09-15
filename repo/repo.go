@@ -17,7 +17,8 @@ type requestStatus int
 type jobStatus int
 
 var (
-	requestStatusNew requestStatus = 0
+	requestStatusNew        requestStatus = 0
+	requestStatusInProgress requestStatus = 1
 
 	jobStatusNew        jobStatus = 0
 	jobStatusInProgress jobStatus = 1
@@ -32,6 +33,7 @@ type Interface interface {
 	MarkJobsInprogress(id int) error
 	SaveExtra(key, value, token string) error
 	JobCompleted(id int) error
+	MarkRequestInProgress(token string) error
 	MarkJobNew(id int) error
 }
 
@@ -194,4 +196,13 @@ func (r *Repo) JobCompleted(id int) error {
 
 func (r *Repo) MarkJobNew(id int) error {
 	return r.updateJobStatus(id, jobStatusNew)
+}
+
+func (r *Repo) MarkRequestInProgress(token string) error {
+	return r.updateRequestStatus(token, requestStatusInProgress)
+}
+
+func (r *Repo) updateRequestStatus(token string, status requestStatus) error {
+	_, err := r.db.Exec("UPDATE requests SET status = ? WHERE token = ?", status, token)
+	return err
 }

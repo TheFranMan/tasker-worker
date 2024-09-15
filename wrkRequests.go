@@ -40,6 +40,11 @@ func processNewRequests(app *application.App) error {
 		if nil != err {
 			return fmt.Errorf("cannot insert inital jobs: %w", err)
 		}
+
+		err = app.Repo.MarkRequestInProgress(request.Token)
+		if nil != err {
+			return fmt.Errorf("cannot mark request as in progress: %w", err)
+		}
 	}
 
 	return nil
