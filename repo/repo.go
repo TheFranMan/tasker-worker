@@ -32,6 +32,7 @@ type Interface interface {
 	MarkJobsInprogress(id int) error
 	SaveExtra(key, value, token string) error
 	JobCompleted(id int) error
+	MarkJobNew(id int) error
 }
 
 type Request struct {
@@ -54,7 +55,7 @@ type Job struct {
 	Step      int          `db:"step"`
 	Status    int          `db:"status"`
 	Created   time.Time    `db:"created"`
-	Completed sql.NullTime `db:"complete"`
+	Completed sql.NullTime `db:"completed"`
 }
 
 type Params struct {
@@ -162,8 +163,23 @@ func (r *Repo) MarkJobsInprogress(id int) error {
 }
 
 func (r *Repo) updateJobStatus(id int, status jobStatus) error {
-	// Todo: If job is completed update the completed time as well
-	_, err := r.db.Exec("UPDATE jobs SET status = ? WHERE id = ?", status, id)
+	ub := sqlb.NewUpdateBuilder()
+
+	updates := []string{
+		ub.Assign("status", status),
+	}
+
+	if jobStatusCompleted == status {
+		updates = append(updates, "completed = NOW()")
+	}
+
+	ub.Update("jobs")
+	ub.Set(updates...)
+	ub.Where(ub.Equal("id", id))
+
+	sql, args := ub.Build()
+
+	_, err := r.db.Exec(sql, args...)
 	return err
 }
 
@@ -174,4 +190,8 @@ func (r *Repo) SaveExtra(key, value, token string) error {
 
 func (r *Repo) JobCompleted(id int) error {
 	return r.updateJobStatus(id, jobStatusCompleted)
+}
+
+func (r *Repo) MarkJobNew(id int) error {
+	return r.updateJobStatus(id, jobStatusNew)
 }
