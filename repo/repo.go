@@ -177,17 +177,11 @@ func (r *Repo) updateRequestStatus(token string, status requestStatus) error {
 
 func (r *Repo) updateJobStatus(id int, status jobStatus) error {
 	ub := sqlb.NewUpdateBuilder()
-
-	updates := []string{
-		ub.Assign("status", status),
-	}
-
-	if jobStatusCompleted == status {
-		updates = append(updates, "completed = NOW()")
-	}
-
 	ub.Update("jobs")
-	ub.Set(updates...)
+	ub.Set(
+		ub.Assign("status", status),
+		"completed = NOW()",
+	)
 	ub.Where(ub.Equal("id", id))
 
 	sql, args := ub.Build()
