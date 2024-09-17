@@ -13,6 +13,20 @@ import (
 	"taskWorker/common"
 )
 
+type Interface interface {
+	GetNewRequests() ([]Request, error)
+	GetInProgressRequests() ([]Request, error)
+	GetRequest(token string) (*Request, error)
+	SaveExtra(key, value, token string) error
+	GetNewJobs() ([]Job, error)
+	GetRequestStepJobs(token string, step int) ([]Job, error)
+	InsertJobs(jobDetails []JobDetails) error
+	MarkRequestInProgress(token string) error
+	MarkJobNew(id int) error
+	MarkJobInprogress(id int) error
+	MarkJobCompleted(id int) error
+}
+
 type requestStatus int
 type jobStatus int
 
@@ -83,18 +97,6 @@ var (
 	jobStatusCompleted  jobStatus = 2
 )
 
-type Interface interface {
-	GetNewRequests() ([]Request, error)
-	GetRequest(token string) (*Request, error)
-	SaveExtra(key, value, token string) error
-	GetNewJobs() ([]Job, error)
-	InsertJobs(jobDetails []JobDetails) error
-	MarkRequestInProgress(token string) error
-	MarkJobNew(id int) error
-	MarkJobInprogress(id int) error
-	MarkJobCompleted(id int) error
-}
-
 type Repo struct {
 	db *sqlx.DB
 }
@@ -116,10 +118,32 @@ func (r *Repo) GetNewRequests() ([]Request, error) {
 	return r.getRequests(requestStatusNew)
 }
 
+func (r *Repo) GetInProgressRequests() ([]Request, error) {
+	return r.getRequests(requestStatusInProgress)
+}
+
 func (r *Repo) GetRequest(token string) (*Request, error) {
 	var request Request
 	err := r.db.Get(&request, "SELECT * FROM requests WHERE token = ?", token)
 	return &request, err
+}
+
+func (r *Repo) GetRequestStepJobs(token string, step int) ([]Job, error) {
+	var jobs []Job
+	err := r.db.Select(&jobs, `SELECT j.id, j.name, j.token, j.step, j.status, j.created, j.completed
+		FROM jobs j
+		INNER JOIN (
+			SELECT name, MAX(created) AS max_created
+			FROM jobs
+			WHERE token = ? AND step = ?
+			GROUP BY name
+		) latest_jobs ON j.name = latest_jobs.name AND j.created = latest_jobs.max_created
+		WHERE token = ?`, token, step, token)
+	if nil != err {
+		return nil, fmt.Errorf("cannot retrieve jobs: %w", err)
+	}
+
+	return jobs, nil
 }
 
 func (r *Repo) InsertJobs(jobDetails []JobDetails) error {

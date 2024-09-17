@@ -16,6 +16,11 @@ func startRequestWrk(app *application.App) {
 	if nil != err {
 		log.WithError(err).Error("cannot start processing new requests")
 	}
+
+	err = processInProgressRequests(app)
+	if nil != err {
+		log.WithError(err).Error("cannot start processing inprogress requests")
+	}
 }
 
 func processNewRequests(app *application.App) error {
@@ -45,6 +50,26 @@ func processNewRequests(app *application.App) error {
 		if nil != err {
 			return fmt.Errorf("cannot mark request as in progress: %w", err)
 		}
+	}
+
+	return nil
+}
+
+func processInProgressRequests(app *application.App) error {
+	requests, err := app.Repo.GetInProgressRequests()
+	if nil != err {
+		return err
+	}
+
+	for _, request := range requests {
+		jobs, err := app.Repo.GetRequestStepJobs(request.Token, request.Step)
+		if nil != err {
+			return err
+		}
+		_ = jobs
+		// for _, job := range jobs {
+
+		//}
 	}
 
 	return nil
