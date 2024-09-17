@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"time"
 
 	log "github.com/sirupsen/logrus"
 
@@ -16,6 +17,8 @@ func startRequestWrk(app *application.App) {
 	if nil != err {
 		log.WithError(err).Error("cannot start processing new requests")
 	}
+
+	time.Sleep(time.Second)
 
 	err = processInProgressRequests(app)
 	if nil != err {
@@ -69,7 +72,15 @@ func processInProgressRequests(app *application.App) error {
 
 		for _, job := range jobs {
 			// If job is failed, mark the request as failed and stop checking the rest of the jobs
-			//
+			if repo.JobStatusFailed == repo.JobStatus(job.Status) {
+				err = app.Repo.MarkRequestFailed(request.Token)
+				if nil != err {
+					return err
+				}
+
+				break
+			}
+
 			//	If the job has an error, reinsert the job.
 			//	If all jobs completed successfully, send the request next step jobs. If on the final step, mark the job as completed.
 			_ = job
