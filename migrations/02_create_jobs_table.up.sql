@@ -3,6 +3,7 @@ CREATE TABLE `jobs` (
   `name` varchar(255) NOT NULL DEFAULT '',
   `token` varchar(255) NOT NULL DEFAULT '',
   `step` int NOT NULL,
+  `error` varchar(255) DEFAULT NULL,
   `status` int NOT NULL DEFAULT '0',
   `created` datetime NOT NULL,
   `completed` datetime DEFAULT NULL,

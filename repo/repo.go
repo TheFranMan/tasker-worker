@@ -50,13 +50,14 @@ type Request struct {
 }
 
 type Job struct {
-	ID        int          `db:"id"`
-	Name      string       `db:"name"`
-	Token     string       `db:"token"`
-	Step      int          `db:"step"`
-	Status    int          `db:"status"`
-	Created   time.Time    `db:"created"`
-	Completed sql.NullTime `db:"completed"`
+	ID        int            `db:"id"`
+	Name      string         `db:"name"`
+	Token     string         `db:"token"`
+	Step      int            `db:"step"`
+	Error     sql.NullString `db:"error"`
+	Status    int            `db:"status"`
+	Created   time.Time      `db:"created"`
+	Completed sql.NullTime   `db:"completed"`
 }
 
 type Params struct {
@@ -124,13 +125,13 @@ func (r *Repo) GetInProgressRequests() ([]Request, error) {
 
 func (r *Repo) GetRequest(token string) (*Request, error) {
 	var request Request
-	err := r.db.Get(&request, "SELECT * FROM requests WHERE token = ?", token)
+	err := r.db.Get(&request, "SELECT token, request_token, action, params, extras, steps, step, created, completed FROM requests WHERE token = ?", token)
 	return &request, err
 }
 
 func (r *Repo) GetRequestStepJobs(token string, step int) ([]Job, error) {
 	var jobs []Job
-	err := r.db.Select(&jobs, `SELECT j.id, j.name, j.token, j.step, j.status, j.created, j.completed
+	err := r.db.Select(&jobs, `SELECT j.id, j.name, j.token, j.step, j.error, j.status, j.created, j.completed
 		FROM jobs j
 		INNER JOIN (
 			SELECT name, MAX(created) AS max_created

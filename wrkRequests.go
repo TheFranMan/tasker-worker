@@ -66,10 +66,14 @@ func processInProgressRequests(app *application.App) error {
 		if nil != err {
 			return err
 		}
-		_ = jobs
-		// for _, job := range jobs {
 
-		//}
+		for _, job := range jobs {
+			// If job is failed, mark the request as failed and stop checking the rest of the jobs
+			//
+			//	If the job has an error, reinsert the job.
+			//	If all jobs completed successfully, send the request next step jobs. If on the final step, mark the job as completed.
+			_ = job
+		}
 	}
 
 	return nil
