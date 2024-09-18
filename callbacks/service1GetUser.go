@@ -18,5 +18,5 @@ func Service1GetUser(app *application.App, request repo.Request, id int) error {
 	}
 
 	// Mark job as completed
-	return app.Repo.MarkJobError(id)
+	return app.Repo.MarkJobCompleted(id)
 }

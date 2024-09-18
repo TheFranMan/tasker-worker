@@ -93,10 +93,7 @@ func processInProgressRequests(app *application.App) error {
 				continue
 			}
 
-			//	If all jobs completed successfully, send the request next step jobs. If on the final step, mark the job as completed.
 		}
-
-		fmt.Printf("%+v\n", errorJobs)
 
 		if 0 < len(errorJobs) {
 			err = app.Repo.InsertJobs(errorJobs)
@@ -106,6 +103,39 @@ func processInProgressRequests(app *application.App) error {
 
 			continue
 		}
+
+		// Launch the next round of jobs
+		if !request.IsLastStep() {
+			jobs := []repo.JobDetails{}
+			nextStep := request.Step + 1
+
+			for _, job := range request.Steps[nextStep].Jobs {
+				jobs = append(jobs, repo.JobDetails{
+					Token: request.Token,
+					Name:  job,
+					Step:  nextStep,
+				})
+			}
+
+			err = app.Repo.InsertJobs(jobs)
+			if nil != err {
+				return fmt.Errorf("cannot insert inital jobs: %w", err)
+			}
+
+			err = app.Repo.UpdateRequestStep(request.Token)
+			if nil != err {
+				return err
+			}
+
+			continue
+		}
+
+		// Mark as completed
+		err = app.Repo.MarkRequestCompleted(request.Token)
+		if nil != err {
+			return err
+		}
+
 	}
 
 	return nil

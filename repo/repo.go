@@ -21,8 +21,10 @@ type Interface interface {
 	GetNewJobs() ([]Job, error)
 	GetRequestStepJobs(token string, step int) ([]Job, error)
 	MarkRequestFailed(token string) error
+	MarkRequestCompleted(token string) error
 	InsertJobs(jobDetails []JobDetails) error
 	MarkRequestInProgress(token string) error
+	UpdateRequestStep(token string) error
 	MarkJobNew(id int) error
 	MarkJobInprogress(id int) error
 	MarkJobCompleted(id int) error
@@ -30,20 +32,21 @@ type Interface interface {
 	MarkJobFailed(id int) error
 }
 
+type RequestStatus int
+type JobStatus int
+
 var (
 	RequestStatusNew        RequestStatus = 0
 	RequestStatusInProgress RequestStatus = 1
+	RequestStatusCompleted  RequestStatus = 2
 	RequestStatusFailed     RequestStatus = 3
 
 	JobStatusNew        JobStatus = 0
 	JobStatusInProgress JobStatus = 1
 	JobStatusCompleted  JobStatus = 2
-	JobStatusError      JobStatus = 3
-	JobStatusFailed     JobStatus = 4
+	JobStatusFailed     JobStatus = 3
+	JobStatusError      JobStatus = 4
 )
-
-type RequestStatus int
-type JobStatus int
 
 type JobDetails struct {
 	Token string
@@ -62,6 +65,10 @@ type Request struct {
 	Status       int            `db:"status"`
 	Created      time.Time      `db:"created"`
 	Completed    sql.NullTime   `db:"completed"`
+}
+
+func (r Request) IsLastStep() bool {
+	return r.Step == len(r.Steps)-1
 }
 
 type Job struct {
@@ -177,6 +184,15 @@ func (r *Repo) MarkRequestInProgress(token string) error {
 	return r.updateRequestStatus(token, RequestStatusInProgress)
 }
 
+func (r *Repo) MarkRequestCompleted(token string) error {
+	return r.updateRequestStatus(token, RequestStatusCompleted)
+}
+
+func (r *Repo) UpdateRequestStep(token string) error {
+	_, err := r.db.Exec("UPDATE requests SET step = step + 1 WHERE token = ?", token)
+	return err
+}
+
 func (r *Repo) GetNewJobs() ([]Job, error) {
 	return r.getJobs(JobStatusNew)
 }
@@ -212,7 +228,21 @@ func (r *Repo) getRequests(status RequestStatus) ([]Request, error) {
 }
 
 func (r *Repo) updateRequestStatus(token string, status RequestStatus) error {
-	_, err := r.db.Exec("UPDATE requests SET status = ? WHERE token = ?", status, token)
+	sets := []string{}
+
+	ub := sqlb.NewUpdateBuilder()
+	ub.Update("requests")
+	sets = append(sets, ub.Assign("status", status))
+
+	if RequestStatusCompleted == status {
+		sets = append(sets, "completed = NOW()")
+	}
+
+	ub.Set(sets...)
+	ub.Where(ub.Equal("token", token))
+
+	sql, args := ub.Build()
+	_, err := r.db.Exec(sql, args...)
 	return err
 }
 
