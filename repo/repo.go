@@ -26,8 +26,21 @@ type Interface interface {
 	MarkJobNew(id int) error
 	MarkJobInprogress(id int) error
 	MarkJobCompleted(id int) error
+	MarkJobError(id int) error
 	MarkJobFailed(id int) error
 }
+
+var (
+	RequestStatusNew        RequestStatus = 0
+	RequestStatusInProgress RequestStatus = 1
+	RequestStatusFailed     RequestStatus = 3
+
+	JobStatusNew        JobStatus = 0
+	JobStatusInProgress JobStatus = 1
+	JobStatusCompleted  JobStatus = 2
+	JobStatusError      JobStatus = 3
+	JobStatusFailed     JobStatus = 4
+)
 
 type RequestStatus int
 type JobStatus int
@@ -90,17 +103,6 @@ func (s *Steps) Scan(value interface{}) error {
 
 	return json.Unmarshal(value.([]byte), s)
 }
-
-var (
-	RequestStatusNew        RequestStatus = 0
-	RequestStatusInProgress RequestStatus = 1
-	RequestStatusFailed     RequestStatus = 3
-
-	JobStatusNew        JobStatus = 0
-	JobStatusInProgress JobStatus = 1
-	JobStatusCompleted  JobStatus = 2
-	JobStatusFailed     JobStatus = 4
-)
 
 type Repo struct {
 	db *sqlx.DB
@@ -189,6 +191,10 @@ func (r *Repo) MarkJobInprogress(id int) error {
 
 func (r *Repo) MarkJobCompleted(id int) error {
 	return r.updateJobStatus(id, JobStatusCompleted)
+}
+
+func (r *Repo) MarkJobError(id int) error {
+	return r.updateJobStatus(id, JobStatusError)
 }
 
 func (r *Repo) MarkJobFailed(id int) error {

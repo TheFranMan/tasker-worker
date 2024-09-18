@@ -70,6 +70,7 @@ func processInProgressRequests(app *application.App) error {
 			return err
 		}
 
+		errorJobs := []repo.JobDetails{}
 		for _, job := range jobs {
 			// If job is failed, mark the request as failed and stop checking the rest of the jobs
 			if repo.JobStatusFailed == repo.JobStatus(job.Status) {
@@ -82,8 +83,28 @@ func processInProgressRequests(app *application.App) error {
 			}
 
 			//	If the job has an error, reinsert the job.
+			if repo.JobStatusError == repo.JobStatus(job.Status) {
+				errorJobs = append(errorJobs, repo.JobDetails{
+					Token: job.Token,
+					Name:  job.Name,
+					Step:  job.Step,
+				})
+
+				continue
+			}
+
 			//	If all jobs completed successfully, send the request next step jobs. If on the final step, mark the job as completed.
-			_ = job
+		}
+
+		fmt.Printf("%+v\n", errorJobs)
+
+		if 0 < len(errorJobs) {
+			err = app.Repo.InsertJobs(errorJobs)
+			if nil != err {
+				return err
+			}
+
+			continue
 		}
 	}
 
