@@ -1,4 +1,11 @@
 services:
+  service1mock:
+    build: ../mocks/service1
+    container_name: service1mock
+    env_file:
+      - .env
+    ports:
+      - 3001:3001
   mysql:
     image: mysql:8.0
     container_name: mysql
