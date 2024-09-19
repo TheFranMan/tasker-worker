@@ -34,7 +34,7 @@ func main() {
 
 	app.Cron = cron.New()
 
-	if app.Config.StartWorkers {
+	if app.Config.WrkEnabled {
 		go startRequestWrk(&app)
 		go startJobWrk(&app)
 	}
