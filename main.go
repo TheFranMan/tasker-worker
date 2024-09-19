@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/robfig/cron/v3"
 	log "github.com/sirupsen/logrus"
 
 	"taskWorker/application"
@@ -31,10 +32,14 @@ func main() {
 
 	app.Repo = r
 
+	app.Cron = cron.New()
+
 	if app.Config.StartWorkers {
 		go startRequestWrk(&app)
 		go startJobWrk(&app)
 	}
+
+	app.Cron.Start()
 
 	log.WithField("Port", app.Config.Port).Info("Starting server")
 	panic(http.ListenAndServe(fmt.Sprintf(":%d", app.Config.Port), server.NewServer()))

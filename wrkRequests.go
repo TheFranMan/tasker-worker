@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"time"
 
 	log "github.com/sirupsen/logrus"
 
@@ -11,19 +10,25 @@ import (
 )
 
 func startRequestWrk(app *application.App) {
-	log.Info("Starting request worker")
+	log.WithField("cron", app.Config.WrkRequestNewCron).Info("Starting request worker")
 
-	err := processNewRequests(app)
-	if nil != err {
-		log.WithError(err).Error("cannot start processing new requests")
-	}
+	app.Cron.AddFunc(app.Config.WrkRequestNewCron, func() {
+		log.Debug("Starting new request run")
 
-	time.Sleep(time.Second)
+		err := processNewRequests(app)
+		if nil != err {
+			log.WithError(err).Error("cannot start processing new requests")
+		}
+	})
 
-	err = processInProgressRequests(app)
-	if nil != err {
-		log.WithError(err).Error("cannot start processing inprogress requests")
-	}
+	app.Cron.AddFunc(app.Config.WrkRequestInProgressCron, func() {
+		log.Debug("Starting inprogress request run")
+
+		err := processInProgressRequests(app)
+		if nil != err {
+			log.WithError(err).Error("cannot start processing inprogress requests")
+		}
+	})
 }
 
 func processNewRequests(app *application.App) error {

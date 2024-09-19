@@ -3,7 +3,6 @@ package main
 import (
 	"errors"
 	"fmt"
-	"time"
 
 	log "github.com/sirupsen/logrus"
 
@@ -21,16 +20,19 @@ func init() {
 }
 
 func startJobWrk(app *application.App) {
-	log.Info("Starting job worker")
+	log.WithField("cron", app.Config.WrkJobCron).Info("Starting job worker")
 
-	err := processNewJobs(app)
-	if nil != err {
-		log.WithError(err).Error("cannot start processing new jobs")
-	}
+	app.Cron.AddFunc(app.Config.WrkJobCron, func() {
+		log.Debug("Starting Job worker run")
+
+		err := processNewJobs(app)
+		if nil != err {
+			log.WithError(err).Error("cannot start processing new jobs")
+		}
+	})
 }
 
 func processNewJobs(app *application.App) error {
-	time.Sleep(time.Second)
 	jobs, err := app.Repo.GetNewJobs()
 	if nil != err {
 		return fmt.Errorf("cannot retrieve new jobs: %w", err)

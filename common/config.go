@@ -25,7 +25,10 @@ type Config struct {
 	DbPort string `env:"DB_PORT"`
 	DbName string `env:"DB_NAME"`
 
-	StartWorkers bool `env:"START_WORKERS" envDefault:"true"`
+	StartWorkers             bool   `env:"START_WORKERS" envDefault:"true"`
+	WrkJobCron               string `env:"WRK_JOB_CRON" envDefault:"*/15 * * * *"`
+	WrkRequestNewCron        string `env:"WRK_REQUEST_NEW_CRON" envDefault:"*/5 * * * *"`
+	WrkRequestInProgressCron string `env:"WRK_REQUEST_INPROGRESS_CRON" envDefault:"*/1 * * * *"`
 }
 
 func GetConfig() (*Config, error) {
