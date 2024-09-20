@@ -11,6 +11,7 @@ import (
 	"taskWorker/common"
 	"taskWorker/repo"
 	"taskWorker/server"
+	"taskWorker/service1"
 )
 
 func main() {
@@ -31,6 +32,8 @@ func main() {
 	}
 
 	app.Repo = r
+
+	app.Service1 = service1.New("http://localhost:3001", nil)
 
 	app.Cron = cron.New()
 

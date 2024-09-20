@@ -39,6 +39,7 @@ func processNewJobs(app *application.App) error {
 	}
 
 	for _, job := range jobs {
+		fmt.Println("Processing job", job.Name)
 		// Retrieve parent request
 		request, err := app.Repo.GetRequest(job.Token)
 		if nil != err {
