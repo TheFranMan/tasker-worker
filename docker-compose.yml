@@ -3,7 +3,7 @@ services:
     build: ../mocks/service1
     container_name: service1mock
     env_file:
-      - .env
+      - ../mocks/service1/.env
     ports:
       - 3001:3001
   mysql:
