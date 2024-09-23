@@ -8,10 +8,12 @@ import (
 
 type Interface interface {
 	UserGet(id int) (*User, error)
+	DeleteUser(id int) error
 }
 
 var (
-	pathUserGet = "/user/%d"
+	pathUserDelete = "/user"
+	pathUserGet    = "/user/%d"
 )
 
 type User struct {
@@ -59,4 +61,22 @@ func (s Service1) UserGet(id int) (*User, error) {
 	}
 
 	return &user, nil
+}
+
+func (s Service1) DeleteUser(id int) error {
+	req, err := http.NewRequest(http.MethodDelete, fmt.Sprintf("%s%s", s.domain, pathUserDelete), nil)
+	if nil != err {
+		return err
+	}
+
+	res, err := s.client.Do(req)
+	if nil != err {
+		return err
+	}
+
+	if http.StatusOK != res.StatusCode {
+		return fmt.Errorf("recieved status code %d", res.StatusCode)
+	}
+
+	return nil
 }

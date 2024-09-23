@@ -7,13 +7,13 @@ import (
 )
 
 func Service1GetUser(app *application.App, request repo.Request, id int) error {
-	fmt.Println("In Service1GetUser lala:")
 	// Call external API
 	user, err := app.Service1.UserGet(id)
 	if nil != err {
 		return err
 	}
-	fmt.Printf("%+v\n", user)
+
+	_ = user
 	email := "example@example.com"
 
 	// Save email to extras
