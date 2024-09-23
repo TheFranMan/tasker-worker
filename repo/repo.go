@@ -133,19 +133,6 @@ func (r *Repo) GetNewRequests() ([]Request, error) {
 }
 
 func (r *Repo) GetInProgressRequests() ([]Request, error) {
-	// var jobs []Job
-	// err := r.db.Select(&jobs, `SELECT j.name, j.token, j.step, j.status, MAX(j.created) AS created
-	// 	FROM jobs j
-	// 	INNER JOIN requests r
-	// 	ON r.token = j.token AND r.step = j.step
-	// 	WHERE r.Status = 1 AND j.Status NOT IN (0, 1)
-	// 	GROUP BY j.name, j.token, j.step, j.status`)
-	// if nil != err {
-	// 	return nil, err
-	// }
-
-	// return jobs, nil
-
 	return r.getRequests(RequestStatusInProgress)
 }
 
@@ -191,9 +178,11 @@ func (r *Repo) SaveExtra(key, value, token string) error {
 	_, err := r.db.Exec(fmt.Sprintf("UPDATE requests SET extras = JSON_SET(extras, '$.%s', ?) WHERE token = ?", key), value, token)
 	return err
 }
+
 func (r *Repo) MarkRequestFailed(token string) error {
 	return r.updateRequestStatus(token, RequestStatusFailed)
 }
+
 func (r *Repo) MarkRequestInProgress(token string) error {
 	return r.updateRequestStatus(token, RequestStatusInProgress)
 }
