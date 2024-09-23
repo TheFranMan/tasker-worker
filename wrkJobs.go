@@ -1,7 +1,6 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 
 	log "github.com/sirupsen/logrus"
@@ -27,7 +26,7 @@ func startJobWrk(app *application.App) {
 
 		err := processNewJobs(app)
 		if nil != err {
-			log.WithError(err).Error("cannot start processing new jobs")
+			log.WithError(err).Error("cannot process new jobs")
 		}
 	})
 }
@@ -39,23 +38,25 @@ func processNewJobs(app *application.App) error {
 	}
 
 	for _, job := range jobs {
-		fmt.Println("Processing job", job.Name)
 		// Retrieve parent request
 		request, err := app.Repo.GetRequest(job.Token)
 		if nil != err {
-			return fmt.Errorf("cannot retrieve a jobs request: %w", err)
-		}
-
-		if nil == request {
-			return errors.New("empty request found for job")
+			log.WithError(err).Error("cannot retrieve a jobs request: %w", err)
+			continue
 		}
 
 		l := log.WithFields(log.Fields{
-			"token":    request.Token,
+			"id":       job.ID,
+			"token":    job.Token,
+			"step":     job.Step,
 			"callback": job.Name,
 		})
 
-		// Call callback
+		if nil == request {
+			l.Warn("cannot retrieve request based on a job")
+			continue
+		}
+
 		if _, exists := callbacks[job.Name]; !exists {
 			l.Warn("unknown job name")
 			continue
@@ -65,23 +66,26 @@ func processNewJobs(app *application.App) error {
 			// Update job status
 			err := app.Repo.MarkJobInprogress(job.ID)
 			if nil != err {
-				return fmt.Errorf("cannot update job %d status to inprogress: %w", job.ID, err)
+				return fmt.Errorf("cannot update job status to inprogress: %w", err)
 			}
 
 			err = callbacks[job.Name](app, *request, job.ID)
 			if nil != err {
 				return fmt.Errorf("cannot process job: %w", err)
 			}
+
 			return nil
 		}()
 
 		if nil != tryErr {
 			err = app.Repo.MarkJobNew(job.ID)
 			if nil != err {
-				return fmt.Errorf("cannot reset job %d as new (error: %w) after orginal error: %w", job.ID, err, tryErr)
+				l.WithError(fmt.Errorf("reset job error: %w, original error: %w", tryErr, err)).Errorf("cannot reset job as new after orginal error")
+				continue
 			}
 
-			return fmt.Errorf("cannot process new job %d: %w", job.ID, tryErr)
+			log.WithError(tryErr).Error("cannot process new job")
+			continue
 		}
 	}
 

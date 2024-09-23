@@ -22,7 +22,7 @@ type Interface interface {
 	GetRequestStepJobs(token string, step int) ([]Job, error)
 	MarkRequestFailed(token string) error
 	MarkRequestCompleted(token string) error
-	InsertJobs(jobDetails []JobDetails) error
+	InsertJobs(jobs []Job) error
 	MarkRequestInProgress(token string) error
 	UpdateRequestStep(token string) error
 	MarkJobNew(id int) error
@@ -133,6 +133,19 @@ func (r *Repo) GetNewRequests() ([]Request, error) {
 }
 
 func (r *Repo) GetInProgressRequests() ([]Request, error) {
+	// var jobs []Job
+	// err := r.db.Select(&jobs, `SELECT j.name, j.token, j.step, j.status, MAX(j.created) AS created
+	// 	FROM jobs j
+	// 	INNER JOIN requests r
+	// 	ON r.token = j.token AND r.step = j.step
+	// 	WHERE r.Status = 1 AND j.Status NOT IN (0, 1)
+	// 	GROUP BY j.name, j.token, j.step, j.status`)
+	// if nil != err {
+	// 	return nil, err
+	// }
+
+	// return jobs, nil
+
 	return r.getRequests(RequestStatusInProgress)
 }
 
@@ -160,12 +173,13 @@ func (r *Repo) GetRequestStepJobs(token string, step int) ([]Job, error) {
 	return jobs, nil
 }
 
-func (r *Repo) InsertJobs(jobDetails []JobDetails) error {
+func (r *Repo) InsertJobs(jobs []Job) error {
 	ib := sqlb.NewInsertBuilder()
 	ib.InsertInto("jobs")
 	ib.Cols("token", "name", "step", "status", "created")
-	for _, jobDetail := range jobDetails {
-		ib.Values(jobDetail.Token, jobDetail.Name, jobDetail.Step, 0, sqlb.Raw("NOW()"))
+
+	for _, job := range jobs {
+		ib.Values(job.Token, job.Name, job.Step, 0, sqlb.Raw("NOW()"))
 	}
 
 	sql, args := ib.Build()
