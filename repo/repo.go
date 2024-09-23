@@ -28,7 +28,7 @@ type Interface interface {
 	MarkJobNew(id int) error
 	MarkJobInprogress(id int) error
 	MarkJobCompleted(id int) error
-	MarkJobError(id int) error
+	MarkJobError(id int, err error) error
 	MarkJobFailed(id int) error
 }
 
@@ -212,8 +212,13 @@ func (r *Repo) MarkJobCompleted(id int) error {
 	return r.updateJobStatus(id, JobStatusCompleted)
 }
 
-func (r *Repo) MarkJobError(id int) error {
-	return r.updateJobStatus(id, JobStatusError)
+func (r *Repo) MarkJobError(id int, jobErr error) error {
+	_, err := r.db.Exec("Update jobs SET status = ?, error = ? WHERE id = ?", JobStatusError, jobErr.Error(), id)
+	if nil != err {
+		return err
+	}
+
+	return nil
 }
 
 func (r *Repo) MarkJobFailed(id int) error {
