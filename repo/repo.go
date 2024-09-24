@@ -10,7 +10,7 @@ import (
 	sqlb "github.com/huandu/go-sqlbuilder"
 	"github.com/jmoiron/sqlx"
 
-	"taskWorker/common"
+	"worker/common"
 )
 
 type Interface interface {

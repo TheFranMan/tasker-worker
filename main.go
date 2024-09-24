@@ -7,11 +7,11 @@ import (
 	"github.com/robfig/cron/v3"
 	log "github.com/sirupsen/logrus"
 
-	"taskWorker/application"
-	"taskWorker/common"
-	"taskWorker/repo"
-	"taskWorker/server"
-	"taskWorker/service1"
+	"worker/application"
+	"worker/common"
+	"worker/repo"
+	"worker/server"
+	"worker/service1"
 )
 
 func main() {

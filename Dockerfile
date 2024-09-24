@@ -4,10 +4,10 @@ COPY go.mod go.sum ./
 RUN go mod download
 COPY . .
 # RUN go test ./...
-RUN CGO_ENABLED=0 GOOS=linux go build -o /taskWorker
+RUN CGO_ENABLED=0 GOOS=linux go build -o /worker
 
 FROM alpine:3.14 AS release
 WORKDIR /
-COPY --from=base-stage /taskWorker /taskWorker
+COPY --from=base-stage /worker /worker
 EXPOSE 3000
-ENTRYPOINT [ "/taskWorker" ]
+ENTRYPOINT [ "/worker" ]

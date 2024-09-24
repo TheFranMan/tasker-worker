@@ -5,9 +5,9 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	"taskWorker/application"
-	cb "taskWorker/callbacks"
-	"taskWorker/repo"
+	"worker/application"
+	cb "worker/callbacks"
+	"worker/repo"
 )
 
 var callbacks = map[string]func(*application.App, repo.Request, int) error{}

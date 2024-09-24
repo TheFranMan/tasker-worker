@@ -1,28 +1,28 @@
 services:
   mysql:
     image: mysql:8.0
-    container_name: mysql
+    container_name: db
     environment:
       MYSQL_ROOT_PASSWORD: 'password'
     ports:
       - 3307:3306
     volumes:
-      - taskWorker_db:/var/lib/mysql
-  # taskworker:
+      - db:/var/lib/mysql
+  # worker:
   #   build: .
-  #   container_name: taskworker
+  #   container_name: worker
   #   env_file:
   #     - .env
   #   environment:
   #     DB_HOST: mysql
   #     DB_PORT: 3306
   #   links:
-  #     - mysql
+  #     - db
   #   depends_on:
-  #     mysql:
+  #     db:
   #       condition: service_started
   #   ports:
   #     - 3000:3000
 
 volumes:
-  taskWorker_db:
+  db:

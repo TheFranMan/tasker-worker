@@ -2,8 +2,8 @@ package callbacks
 
 import (
 	"fmt"
-	"taskWorker/application"
-	"taskWorker/repo"
+	"worker/application"
+	"worker/repo"
 )
 
 func Service1GetUser(app *application.App, request repo.Request, id int) error {

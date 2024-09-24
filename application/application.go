@@ -3,9 +3,9 @@ package application
 import (
 	"github.com/robfig/cron/v3"
 
-	"taskWorker/common"
-	"taskWorker/repo"
-	"taskWorker/service1"
+	"worker/common"
+	"worker/repo"
+	"worker/service1"
 )
 
 type App struct {

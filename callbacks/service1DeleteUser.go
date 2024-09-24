@@ -2,8 +2,8 @@ package callbacks
 
 import (
 	"fmt"
-	"taskWorker/application"
-	"taskWorker/repo"
+	"worker/application"
+	"worker/repo"
 
 	log "github.com/sirupsen/logrus"
 )

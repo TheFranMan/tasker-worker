@@ -5,8 +5,8 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	"taskWorker/application"
-	"taskWorker/repo"
+	"worker/application"
+	"worker/repo"
 )
 
 func startRequestWrk(app *application.App) {
