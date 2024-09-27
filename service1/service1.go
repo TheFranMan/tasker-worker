@@ -10,6 +10,7 @@ import (
 type Interface interface {
 	UserGet(id int) (*User, error)
 	DeleteUser(id int) error
+	UpdateUser(id int, email string) error
 }
 
 var (
@@ -82,7 +83,7 @@ func (s Service1) DeleteUser(id int) error {
 	return nil
 }
 
-func (s Service1) UserUpdate(id int, email string) error {
+func (s Service1) UpdateUser(id int, email string) error {
 	req, err := http.NewRequest(
 		http.MethodPost,
 		fmt.Sprintf(fmt.Sprintf("%s%s", s.domain, pathUserGet), id),
