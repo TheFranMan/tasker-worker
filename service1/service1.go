@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
 )
 
 type Interface interface {
@@ -76,6 +77,36 @@ func (s Service1) DeleteUser(id int) error {
 
 	if http.StatusOK != res.StatusCode {
 		return fmt.Errorf("recieved status code %d", res.StatusCode)
+	}
+
+	return nil
+}
+
+func (s Service1) UserUpdate(id int, email string) error {
+	req, err := http.NewRequest(
+		http.MethodPost,
+		fmt.Sprintf(fmt.Sprintf("%s%s", s.domain, pathUserGet), id),
+		strings.NewReader(fmt.Sprintf(`{"email":"%s"}`, email)),
+	)
+	if nil != err {
+		return err
+	}
+
+	res, err := s.client.Do(req)
+	if nil != err {
+		return err
+	}
+
+	if http.StatusOK != res.StatusCode {
+		return fmt.Errorf("recieved status code %d", res.StatusCode)
+	}
+
+	defer res.Body.Close()
+
+	var user User
+	err = json.NewDecoder(res.Body).Decode(&user)
+	if nil != err {
+		return fmt.Errorf("cannot decode response: %w", err)
 	}
 
 	return nil
