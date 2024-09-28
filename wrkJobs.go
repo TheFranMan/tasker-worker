@@ -20,6 +20,14 @@ func init() {
 	callbacks["service1DeleteUser"] = func(app *application.App, request repo.Request, id int) error {
 		return cb.Service1DeleteUser(app, request, id)
 	}
+
+	callbacks["service2DeleteUser"] = func(app *application.App, request repo.Request, id int) error {
+		return cb.Service2DeleteUser(app, request, id)
+	}
+
+	callbacks["service3DeleteUser"] = func(app *application.App, request repo.Request, id int) error {
+		return cb.Service3DeleteUser(app, request, id)
+	}
 }
 
 func startJobWrk(app *application.App) {

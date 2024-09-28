@@ -13,11 +13,8 @@ func Service1GetUser(app *application.App, request repo.Request, id int) error {
 		return err
 	}
 
-	_ = user
-	email := "example@example.com"
-
 	// Save email to extras
-	err = app.Repo.SaveExtra("email", email, request.Token)
+	err = app.Repo.SaveExtra("email", user.Email, request.Token)
 	if nil != err {
 		return fmt.Errorf("cannot save email in extra: %w", err)
 	}
