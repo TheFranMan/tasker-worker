@@ -7,6 +7,7 @@ import (
 	"worker/repo"
 	"worker/service1"
 	"worker/service2"
+	"worker/service3"
 )
 
 type App struct {
@@ -15,4 +16,5 @@ type App struct {
 	Cron     *cron.Cron
 	Service1 service1.Interface
 	Service2 service2.Interface
+	Service3 service3.Interface
 }
