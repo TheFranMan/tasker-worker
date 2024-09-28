@@ -12,6 +12,7 @@ import (
 	"worker/repo"
 	"worker/server"
 	"worker/service1"
+	"worker/service2"
 )
 
 func main() {
@@ -34,6 +35,7 @@ func main() {
 	app.Repo = r
 
 	app.Service1 = service1.New("http://localhost:3001", nil)
+	app.Service2 = service2.New("http://localhost:3002", nil)
 
 	app.Cron = cron.New()
 
