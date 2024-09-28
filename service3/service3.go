@@ -49,7 +49,7 @@ func (s Service3) UserGet(email string) (*User, error) {
 		return nil, err
 	}
 
-	if http.StatusOK == resp.StatusCode {
+	if http.StatusOK != resp.StatusCode {
 		return nil, fmt.Errorf("recieved status code %d", resp.StatusCode)
 	}
 
@@ -75,7 +75,7 @@ func (s Service3) DeleteUser(email string) error {
 		return err
 	}
 
-	if http.StatusOK == resp.StatusCode {
+	if http.StatusOK != resp.StatusCode {
 		return fmt.Errorf("recieved status code %d", resp.StatusCode)
 	}
 
@@ -93,7 +93,7 @@ func (s Service3) UpdateUser(oldEmail, newEmail string) error {
 		return err
 	}
 
-	if http.StatusOK == resp.StatusCode {
+	if http.StatusOK != resp.StatusCode {
 		return fmt.Errorf("recieved status code %d", resp.StatusCode)
 	}
 
