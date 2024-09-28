@@ -102,13 +102,5 @@ func (s Service1) UpdateUser(id int, email string) error {
 		return fmt.Errorf("recieved status code %d", res.StatusCode)
 	}
 
-	defer res.Body.Close()
-
-	var user User
-	err = json.NewDecoder(res.Body).Decode(&user)
-	if nil != err {
-		return fmt.Errorf("cannot decode response: %w", err)
-	}
-
 	return nil
 }
