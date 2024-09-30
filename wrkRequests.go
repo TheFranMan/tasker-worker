@@ -39,6 +39,10 @@ func processNewRequests(app *application.App) error {
 
 	for _, request := range requests {
 		jobs := []repo.Job{}
+		l := log.WithFields(log.Fields{
+			"token":  request.Token,
+			"action": request.Action,
+		})
 
 		for _, job := range request.Steps[0].Jobs {
 			jobs = append(jobs, repo.Job{
@@ -50,12 +54,14 @@ func processNewRequests(app *application.App) error {
 
 		err = app.Repo.InsertJobs(jobs)
 		if nil != err {
-			return fmt.Errorf("cannot insert jobs: %w", err)
+			l.WithError(err).Error("cannot insert jobs")
+			continue
 		}
 
 		err = app.Repo.MarkRequestInProgress(request.Token)
 		if nil != err {
-			return fmt.Errorf("cannot mark request as in progress: %w", err)
+			l.WithError(err).Error("cannot mark request as in progress")
+			continue
 		}
 	}
 
