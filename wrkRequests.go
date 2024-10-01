@@ -22,11 +22,11 @@ func startRequestWrk(app *application.App) {
 	})
 
 	app.Cron.AddFunc(app.Config.WrkRequestInProgressCron, func() {
-		log.Debug("Starting inprogress request run")
+		log.Debug("Starting in progress request run")
 
 		err := processInProgressRequests(app)
 		if nil != err {
-			log.WithError(err).Error("cannot process in-progress requests")
+			log.WithError(err).Error("cannot process in progress requests")
 		}
 	})
 }
@@ -71,23 +71,26 @@ func processNewRequests(app *application.App) error {
 func processInProgressRequests(app *application.App) error {
 	requests, err := app.Repo.GetInProgressRequests()
 	if nil != err {
-		return err
+		return fmt.Errorf("cannot get in progress requests: %w", err)
 	}
 
 	for _, request := range requests {
+		l := log.WithFields(log.Fields{
+			"token":  request.Token,
+			"step":   request.Step,
+			"action": request.Action,
+		})
+
 		jobs, err := app.Repo.GetRequestStepJobs(request.Token, request.Step)
+		if nil != err {
+			l.WithError(err).Error("cannot get jobs for this step")
+			continue
+		}
 
 		errorJobs := []repo.Job{}
 		successCnt := 0
 
-		l := log.WithFields(log.Fields{
-			"token":  request.Token,
-			"step":   request.Step,
-			"status": request.Status,
-		})
-
 		for _, job := range jobs {
-			fmt.Printf("In progress job: %+v\n", job)
 			l = l.WithField("name", job.Name)
 
 			// Job completed successfully, keep a count of these so we can check all of the request jobs completed successfully.
@@ -122,42 +125,43 @@ func processInProgressRequests(app *application.App) error {
 
 			continue
 		}
-		fmt.Println(successCnt, len(jobs))
 
-		if successCnt == len(jobs) {
-			// Mark the request as completed.
-			if request.IsLastStep() {
-				err = app.Repo.MarkRequestCompleted(request.Token)
-				if nil != err {
-					l.WithError(err).Error("cannot mark request as complete")
-				}
+		if successCnt != len(jobs) {
+			continue
+		}
 
-				continue
-			}
-
-			// Insert the request's jobs from it's next step.
-			jobs := []repo.Job{}
-			nextStep := request.Step + 1
-
-			for _, job := range request.Steps[nextStep].Jobs {
-				jobs = append(jobs, repo.Job{
-					Token: request.Token,
-					Name:  job,
-					Step:  nextStep,
-				})
-			}
-
-			err = app.Repo.InsertJobs(jobs)
+		// Mark the request as completed.
+		if request.IsLastStep() {
+			err = app.Repo.MarkRequestCompleted(request.Token)
 			if nil != err {
-				l.WithError(err).Error("cannot insert next step jobs")
-				continue
+				l.WithError(err).Error("cannot mark request as completed")
 			}
 
-			err = app.Repo.UpdateRequestStep(request.Token)
-			if nil != err {
-				l.WithError(err).Error("cannot update request step")
-				continue
-			}
+			continue
+		}
+
+		// Insert the request's jobs from it's next step.
+		jobs = []repo.Job{}
+		nextStep := request.Step + 1
+
+		for _, job := range request.Steps[nextStep].Jobs {
+			jobs = append(jobs, repo.Job{
+				Token: request.Token,
+				Name:  job,
+				Step:  nextStep,
+			})
+		}
+
+		err = app.Repo.InsertJobs(jobs)
+		if nil != err {
+			l.WithError(err).Error("cannot insert next step jobs")
+			continue
+		}
+
+		err = app.Repo.UpdateRequestStep(request.Token)
+		if nil != err {
+			l.WithError(err).Error("cannot update request step")
+			continue
 		}
 	}
 
