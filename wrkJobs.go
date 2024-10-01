@@ -62,19 +62,19 @@ func processNewJobs(app *application.App) error {
 	}
 
 	for _, job := range jobs {
+		l := log.WithFields(log.Fields{
+			"id":    job.ID,
+			"token": job.Token,
+			"step":  job.Step,
+			"name":  job.Name,
+		})
+
 		// Retrieve parent request
 		request, err := app.Repo.GetRequest(job.Token)
 		if nil != err {
-			log.WithError(err).Error("cannot retrieve a jobs request: %w", err)
+			l.WithError(err).Error("cannot retrieve a job's request")
 			continue
 		}
-
-		l := log.WithFields(log.Fields{
-			"id":       job.ID,
-			"token":    job.Token,
-			"step":     job.Step,
-			"callback": job.Name,
-		})
 
 		if nil == request {
 			l.Warn("cannot retrieve request based on a job")
@@ -90,7 +90,7 @@ func processNewJobs(app *application.App) error {
 			// Update job status
 			err := app.Repo.MarkJobInprogress(job.ID)
 			if nil != err {
-				return fmt.Errorf("cannot update job status to inprogress: %w", err)
+				return fmt.Errorf("cannot update job status to in-progress: %w", err)
 			}
 
 			err = callbacks[job.Name](app, *request, job.ID)
@@ -108,7 +108,7 @@ func processNewJobs(app *application.App) error {
 				continue
 			}
 
-			log.WithError(tryErr).Error("cannot process new job")
+			l.WithError(tryErr).Error("cannot process new job")
 			continue
 		}
 	}
