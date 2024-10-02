@@ -46,7 +46,7 @@ func startJobWrk(app *application.App) {
 	log.WithField("cron", app.Config.WrkJobCron).Info("Starting job worker")
 
 	app.Cron.AddFunc(app.Config.WrkJobCron, func() {
-		log.Debug("Starting Job worker run")
+		log.Debug("Starting new job run")
 
 		err := processNewJobs(app)
 		if nil != err {
