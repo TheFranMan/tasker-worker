@@ -261,11 +261,14 @@ func (r *Repo) updateRequestStatus(token string, status RequestStatus) error {
 func (r *Repo) updateJobStatus(id int, status JobStatus) error {
 	ub := sqlb.NewUpdateBuilder()
 	ub.Update("jobs")
-	ub.Set(
-		ub.Assign("status", status),
-		"completed = NOW()",
-	)
 	ub.Where(ub.Equal("id", id))
+
+	params := []string{ub.Assign("status", status)}
+	if JobStatusNew != status {
+		params = append(params, "completed = NOW()")
+	}
+
+	ub.Set(params...)
 
 	sql, args := ub.Build()
 
