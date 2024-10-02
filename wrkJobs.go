@@ -86,29 +86,15 @@ func processNewJobs(app *application.App) error {
 			continue
 		}
 
-		tryErr := func() error {
-			// Update job status
-			err := app.Repo.MarkJobInprogress(job.ID)
-			if nil != err {
-				return fmt.Errorf("cannot update job status to in-progress: %w", err)
-			}
+		err = app.Repo.MarkJobInprogress(job.ID)
+		if nil != err {
+			l.Error("cannot update job status to in-progress")
+			continue
+		}
 
-			err = callbacks[job.Name](app, *request, job.ID)
-			if nil != err {
-				return fmt.Errorf("cannot process job: %w", err)
-			}
-
-			return nil
-		}()
-
-		if nil != tryErr {
-			err = app.Repo.MarkJobNew(job.ID)
-			if nil != err {
-				l.WithError(fmt.Errorf("reset job error: %w, original error: %w", tryErr, err)).Errorf("cannot reset job as new after orginal error")
-				continue
-			}
-
-			l.WithError(tryErr).Error("cannot process new job")
+		err = callbacks[job.Name](app, *request, job.ID)
+		if nil != err {
+			l.WithError(err).Error("cannot process new job")
 			continue
 		}
 	}
