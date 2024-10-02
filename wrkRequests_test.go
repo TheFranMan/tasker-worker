@@ -54,7 +54,7 @@ func (s *Suite) SetupSuite() {
 		s.FailNowf(err.Error(), "cannot create dockertest mysql s.resource")
 	}
 
-	s.resource.Expire(60 * 1)
+	s.resource.Expire(60 * 5)
 
 	err = s.pool.Retry(func() error {
 		var err error
