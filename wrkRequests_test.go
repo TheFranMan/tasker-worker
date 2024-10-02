@@ -91,10 +91,10 @@ func (s *Suite) SetupSuite() {
 }
 
 func (s *Suite) TearDownSuite() {
-	// err := s.pool.Purge(s.resource)
-	// if nil != err {
-	// 	s.FailNowf(err.Error(), "cannot purge dockertest mysql resource")
-	// }
+	err := s.pool.Purge(s.resource)
+	if nil != err {
+		s.FailNowf(err.Error(), "cannot purge dockertest mysql resource")
+	}
 }
 
 func (s *Suite) AfterTest() {
