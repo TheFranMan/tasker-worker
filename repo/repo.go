@@ -128,6 +128,14 @@ func NewRepo(config *common.Config) (*Repo, error) {
 	return &Repo{db}, nil
 }
 
+func NewRepoWithDb(db *sqlx.DB) *Repo {
+	db.SetMaxIdleConns(20)
+	db.SetMaxOpenConns(20)
+	db.SetConnMaxIdleTime(5 * time.Minute)
+
+	return &Repo{db}
+}
+
 func (r *Repo) GetNewRequests() ([]Request, error) {
 	return r.getRequests(RequestStatusNew)
 }
