@@ -10,12 +10,12 @@ import (
 	"worker/repo"
 )
 
-func Service3UpdateUser(app *application.App, request repo.Request) error {
+func Service3UpdateUser(app *application.App, request repo.Request) (types.Extras, error) {
 	err := app.Service3.UpdateUser(request.Params.Email, request.Params.Email)
 	if nil != err {
 		log.WithField("id", request.Params.ID).WithError(err).Error("cannot update user email from service 3")
-		return types.Failure{Err: fmt.Errorf("cannot update user email from service 3: %w", err)}
+		return nil, types.Failure{Err: fmt.Errorf("cannot update user email from service 3: %w", err)}
 	}
 
-	return nil
+	return nil, nil
 }

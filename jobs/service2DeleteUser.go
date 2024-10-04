@@ -10,12 +10,12 @@ import (
 	"worker/repo"
 )
 
-func Service2DeleteUser(app *application.App, request repo.Request) error {
+func Service2DeleteUser(app *application.App, request repo.Request) (types.Extras, error) {
 	err := app.Service2.DeleteUser(request.Params.ID)
 	if nil != err {
 		log.WithField("id", request.Params.ID).WithError(err).Error("cannot delete user from service 2")
-		return types.Failure{Err: fmt.Errorf("cannot delete user from service 2: %w", err)}
+		return nil, types.Failure{Err: fmt.Errorf("cannot delete user from service 2: %w", err)}
 	}
 
-	return nil
+	return nil, nil
 }

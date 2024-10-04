@@ -10,12 +10,12 @@ import (
 	"worker/repo"
 )
 
-func Service1UpdateUser(app *application.App, request repo.Request) error {
+func Service1UpdateUser(app *application.App, request repo.Request) (types.Extras, error) {
 	err := app.Service1.UpdateUser(request.Params.ID, request.Params.Email)
 	if nil != err {
 		log.WithField("id", request.Params.ID).WithError(err).Error("cannot update user email from service 1")
-		return types.Failure{Err: fmt.Errorf("cannot save email in extra: %w", err)}
+		return nil, types.Failure{Err: fmt.Errorf("cannot save email in extra: %w", err)}
 	}
 
-	return nil
+	return nil, nil
 }

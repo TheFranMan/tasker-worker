@@ -11,34 +11,34 @@ import (
 	"worker/repo"
 )
 
-var callbacks = map[string]func(*application.App, repo.Request) error{}
+var callbacks = map[string]func(*application.App, repo.Request) (types.Extras, error){}
 
 func init() {
-	callbacks["service1GetUser"] = func(app *application.App, request repo.Request) error {
+	callbacks["service1GetUser"] = func(app *application.App, request repo.Request) (types.Extras, error) {
 		return jobs.Service1GetUser(app, request)
 	}
 
-	callbacks["service1DeleteUser"] = func(app *application.App, request repo.Request) error {
+	callbacks["service1DeleteUser"] = func(app *application.App, request repo.Request) (types.Extras, error) {
 		return jobs.Service1DeleteUser(app, request)
 	}
 
-	callbacks["service2DeleteUser"] = func(app *application.App, request repo.Request) error {
+	callbacks["service2DeleteUser"] = func(app *application.App, request repo.Request) (types.Extras, error) {
 		return jobs.Service2DeleteUser(app, request)
 	}
 
-	callbacks["service3DeleteUser"] = func(app *application.App, request repo.Request) error {
+	callbacks["service3DeleteUser"] = func(app *application.App, request repo.Request) (types.Extras, error) {
 		return jobs.Service3DeleteUser(app, request)
 	}
 
-	callbacks["service1UpdateUser"] = func(app *application.App, request repo.Request) error {
+	callbacks["service1UpdateUser"] = func(app *application.App, request repo.Request) (types.Extras, error) {
 		return jobs.Service1UpdateUser(app, request)
 	}
 
-	callbacks["service2UpdateUser"] = func(app *application.App, request repo.Request) error {
+	callbacks["service2UpdateUser"] = func(app *application.App, request repo.Request) (types.Extras, error) {
 		return jobs.Service2UpdateUser(app, request)
 	}
 
-	callbacks["service3UpdateUser"] = func(app *application.App, request repo.Request) error {
+	callbacks["service3UpdateUser"] = func(app *application.App, request repo.Request) (types.Extras, error) {
 		return jobs.Service3UpdateUser(app, request)
 	}
 }
@@ -93,7 +93,7 @@ func processNewJobs(app *application.App) error {
 			continue
 		}
 
-		err = callbacks[job.Name](app, *request)
+		extras, err := callbacks[job.Name](app, *request)
 
 		switch err.(type) {
 		case types.Retry:
@@ -102,6 +102,15 @@ func processNewJobs(app *application.App) error {
 			app.Repo.MarkJobFailed(job.ID, err)
 		default:
 			app.Repo.MarkJobCompleted(job.ID)
+		}
+
+		if nil != extras {
+			for key, value := range extras {
+				err = app.Repo.SaveExtra(key, value, request.Token)
+				if nil != err {
+					l.WithError(err).Error("cannot save extras for job")
+				}
+			}
 		}
 	}
 

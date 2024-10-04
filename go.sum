@@ -8,6 +8,8 @@ github.com/Nvveen/Gotty v0.0.0-20120604004816-cd527374f1e5 h1:TngWCqHvy9oXAN6lEV
 github.com/Nvveen/Gotty v0.0.0-20120604004816-cd527374f1e5/go.mod h1:lmUJ/7eu/Q8D7ML55dXQrVaamCz2vxCfdQBasLZfHKk=
 github.com/TheFranMan/tasker-common v0.0.0-20241004092338-ad95b8047256 h1:vpma5Tkmf3oymg+pec+qJ8pLfKZKPa6Sv6kFp66m8AY=
 github.com/TheFranMan/tasker-common v0.0.0-20241004092338-ad95b8047256/go.mod h1:xziSY4HYkZIgfV1Amop6GefD1DQ/1nICMc90broqTWA=
+github.com/TheFranMan/tasker-common v0.0.0-20241004211807-274074b07171 h1:upUB+EBC5ADaNlx7+YL9hEUw53PY5ha0BGRFaIW+ZcA=
+github.com/TheFranMan/tasker-common v0.0.0-20241004211807-274074b07171/go.mod h1:xziSY4HYkZIgfV1Amop6GefD1DQ/1nICMc90broqTWA=
 github.com/caarlos0/env v3.5.0+incompatible h1:Yy0UN8o9Wtr/jGHZDpCBLpNrzcFLLM2yixi/rBrKyJs=
 github.com/caarlos0/env v3.5.0+incompatible/go.mod h1:tdCsowwCzMLdkqRYDlHpZCp2UooDD3MspDBjZ2AD02Y=
 github.com/cenkalti/backoff v2.2.1+incompatible h1:tNowT99t7UNflLxfYYSlKYsBpXdEet03Pg2g16Swow4=
