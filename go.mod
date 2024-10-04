@@ -2,10 +2,8 @@ module worker
 
 go 1.23.0
 
-replace github.com/TheFranMan/tasker-common/types => /Users/francis/Projects/apps/tasker/common/types
-
 require (
-	github.com/TheFranMan/tasker-common/types v0.0.0-00010101000000-000000000000
+	github.com/TheFranMan/tasker-common v0.0.0-20241004092338-ad95b8047256
 	github.com/caarlos0/env v3.5.0+incompatible
 	github.com/go-sql-driver/mysql v1.8.1
 	github.com/golang-migrate/migrate/v4 v4.18.1
