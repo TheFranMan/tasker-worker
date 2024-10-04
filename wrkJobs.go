@@ -97,7 +97,7 @@ func processNewJobs(app *application.App) error {
 
 		switch err.(type) {
 		case types.Retry:
-			app.Repo.MarkJobError(job.ID, err)
+			app.Repo.MarkJobRetry(job.ID, err)
 		case types.Failure:
 			app.Repo.MarkJobFailed(job.ID, err)
 		default:

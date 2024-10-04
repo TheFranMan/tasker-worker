@@ -87,7 +87,7 @@ func processInProgressRequests(app *application.App) error {
 			continue
 		}
 
-		errorJobs := []repo.Job{}
+		retryJobs := []repo.Job{}
 		successCnt := 0
 
 		for _, job := range jobs {
@@ -110,15 +110,15 @@ func processInProgressRequests(app *application.App) error {
 			}
 
 			//	If the job has an error, mark the job for reinsertion.
-			if repo.JobStatusError == repo.JobStatus(job.Status) {
-				errorJobs = append(errorJobs, job)
+			if repo.JobStatusRetry == repo.JobStatus(job.Status) {
+				retryJobs = append(retryJobs, job)
 
 				continue
 			}
 		}
 
-		if 0 < len(errorJobs) {
-			err = app.Repo.InsertJobs(errorJobs)
+		if 0 < len(retryJobs) {
+			err = app.Repo.InsertJobs(retryJobs)
 			if nil != err {
 				l.WithError(err).Error("cannot reinsert failed jobs")
 			}

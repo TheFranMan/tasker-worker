@@ -28,7 +28,7 @@ type Interface interface {
 	MarkJobNew(id int) error
 	MarkJobInprogress(id int) error
 	MarkJobCompleted(id int) error
-	MarkJobError(id int, err error) error
+	MarkJobRetry(id int, err error) error
 	MarkJobFailed(id int, err error) error
 }
 
@@ -45,7 +45,7 @@ var (
 	JobStatusInProgress JobStatus = 1
 	JobStatusCompleted  JobStatus = 2
 	JobStatusFailed     JobStatus = 3
-	JobStatusError      JobStatus = 4
+	JobStatusRetry      JobStatus = 4
 )
 
 type JobDetails struct {
@@ -220,8 +220,8 @@ func (r *Repo) MarkJobCompleted(id int) error {
 	return r.updateJobStatus(id, JobStatusCompleted)
 }
 
-func (r *Repo) MarkJobError(id int, err error) error {
-	return r.markJobWithError(id, err, JobStatusError)
+func (r *Repo) MarkJobRetry(id int, err error) error {
+	return r.markJobWithError(id, err, JobStatusRetry)
 }
 
 func (r *Repo) MarkJobFailed(id int, err error) error {
