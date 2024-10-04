@@ -7,7 +7,7 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"worker/application"
-	cb "worker/callbacks"
+	"worker/jobs"
 	"worker/repo"
 )
 
@@ -15,31 +15,31 @@ var callbacks = map[string]func(*application.App, repo.Request) error{}
 
 func init() {
 	callbacks["service1GetUser"] = func(app *application.App, request repo.Request) error {
-		return cb.Service1GetUser(app, request)
+		return jobs.Service1GetUser(app, request)
 	}
 
 	callbacks["service1DeleteUser"] = func(app *application.App, request repo.Request) error {
-		return cb.Service1DeleteUser(app, request)
+		return jobs.Service1DeleteUser(app, request)
 	}
 
 	callbacks["service2DeleteUser"] = func(app *application.App, request repo.Request) error {
-		return cb.Service2DeleteUser(app, request)
+		return jobs.Service2DeleteUser(app, request)
 	}
 
 	callbacks["service3DeleteUser"] = func(app *application.App, request repo.Request) error {
-		return cb.Service3DeleteUser(app, request)
+		return jobs.Service3DeleteUser(app, request)
 	}
 
 	callbacks["service1UpdateUser"] = func(app *application.App, request repo.Request) error {
-		return cb.Service1UpdateUser(app, request)
+		return jobs.Service1UpdateUser(app, request)
 	}
 
 	callbacks["service2UpdateUser"] = func(app *application.App, request repo.Request) error {
-		return cb.Service2UpdateUser(app, request)
+		return jobs.Service2UpdateUser(app, request)
 	}
 
 	callbacks["service3UpdateUser"] = func(app *application.App, request repo.Request) error {
-		return cb.Service3UpdateUser(app, request)
+		return jobs.Service3UpdateUser(app, request)
 	}
 }
 

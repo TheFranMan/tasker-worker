@@ -1,4 +1,4 @@
-package callbacks
+package jobs
 
 import (
 	"encoding/json"
