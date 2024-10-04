@@ -1,3 +1,5 @@
+//go:build intergration
+
 package main
 
 import (
