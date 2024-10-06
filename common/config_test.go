@@ -7,7 +7,28 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func setEnvs() {
+	os.Setenv("PORT", "3000")
+	os.Setenv("DB_USER", "DB_USER")
+	os.Setenv("DB_PASS", "DB_PASS")
+	os.Setenv("DB_HOST", "DB_HOST")
+	os.Setenv("DB_PORT", "1")
+	os.Setenv("DB_NAME", "DB_NAME")
+}
+
+func unsetEnvs() {
+	os.Unsetenv("PORT")
+	os.Unsetenv("DB_USER")
+	os.Unsetenv("DB_PASS")
+	os.Unsetenv("DB_HOST")
+	os.Unsetenv("DB_PORT")
+	os.Unsetenv("DB_NAME")
+}
+
 func TestConfig(t *testing.T) {
+	setEnvs()
+	defer unsetEnvs()
+
 	t.Run("Can set env locale", func(t *testing.T) {
 		for _, test := range []struct {
 			env  string

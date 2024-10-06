@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/caarlos0/env"
+	"github.com/caarlos0/env/v11"
 	_ "github.com/joho/godotenv/autoload"
 	log "github.com/sirupsen/logrus"
 )
@@ -17,14 +17,14 @@ type Envs struct {
 
 type Config struct {
 	Envs
-	Port int    `env:"PORT"`
+	Port int    `env:"PORT,notEmpty"`
 	Env  string `env:"ENV"`
 
-	DbUser string `env:"DB_USER"`
-	DbPass string `env:"DB_PASS"`
-	DbHost string `env:"DB_HOST"`
-	DbPort string `env:"DB_PORT"`
-	DbName string `env:"DB_NAME"`
+	DbUser string `env:"DB_USER,notEmpty"`
+	DbPass string `env:"DB_PASS,notEmpty"`
+	DbHost string `env:"DB_HOST,notEmpty"`
+	DbPort string `env:"DB_PORT,notEmpty"`
+	DbName string `env:"DB_NAME,notEmpty"`
 
 	WrkEnabled               bool   `env:"WRK_ENABLED" envDefault:"true"`
 	WrkJobCron               string `env:"WRK_JOB_CRON" envDefault:"*/15 * * * *"`
