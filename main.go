@@ -20,7 +20,7 @@ func main() {
 	log.Info("Retrieving configuration")
 	cfg, err := common.GetConfig()
 	if nil != err {
-		panic(fmt.Errorf("cannot get env variables: %w", err))
+		log.WithError(err).Panic("cannot get enviroment variables")
 	}
 
 	app := application.App{
@@ -30,7 +30,7 @@ func main() {
 	log.Info("Connecting to local repo")
 	r, err := repo.NewRepo(app.Config)
 	if nil != err {
-		panic(fmt.Errorf("cannot connect to MYSQL server: %w", err))
+		log.WithError(err).Panic("cannot connect to MYSQL server")
 	}
 
 	app.Repo = r
@@ -49,5 +49,8 @@ func main() {
 	app.Cron.Start()
 
 	log.WithField("Port", app.Config.Port).Info("Starting server")
-	panic(http.ListenAndServe(fmt.Sprintf(":%d", app.Config.Port), server.NewServer()))
+	err = http.ListenAndServe(fmt.Sprintf(":%d", app.Config.Port), server.NewServer())
+	if nil != err {
+		log.WithError(err).Panic("cannot start HTTP server")
+	}
 }
