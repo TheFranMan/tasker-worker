@@ -183,7 +183,7 @@ func (r *Repo) InsertJobs(jobs []Job) error {
 }
 
 func (r *Repo) SaveExtra(key, value, token string) error {
-	_, err := r.db.Exec(fmt.Sprintf("UPDATE requests SET extras = JSON_SET(extras, '$.%s', ?) WHERE token = ?", key), value, token)
+	_, err := r.db.Exec(fmt.Sprintf("UPDATE requests SET extras = JSON_SET(IFNULL(extras, '{}'), '$.%s', ?) WHERE token = ?", key), value, token)
 	return err
 }
 
