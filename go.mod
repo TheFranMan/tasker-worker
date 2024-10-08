@@ -2,8 +2,6 @@ module worker
 
 go 1.23.0
 
-replace github.com/TheFranMan/tasker-common => /Users/francis/Projects/apps/tasker/common
-
 require (
 	github.com/TheFranMan/tasker-common v0.0.0-20241004211807-274074b07171
 	github.com/caarlos0/env v3.5.0+incompatible
