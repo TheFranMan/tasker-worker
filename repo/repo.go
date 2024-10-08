@@ -17,7 +17,7 @@ type Interface interface {
 	GetNewRequests() ([]Request, error)
 	GetInProgressRequests() ([]Request, error)
 	GetRequest(token string) (*Request, error)
-	SaveExtra(key, value, token string) error
+	SaveExtra(key string, value any, token string) error
 	GetNewJobs() ([]Job, error)
 	GetRequestStepJobs(token string, step int) ([]Job, error)
 	MarkRequestFailed(token string) error
@@ -182,7 +182,7 @@ func (r *Repo) InsertJobs(jobs []Job) error {
 	return err
 }
 
-func (r *Repo) SaveExtra(key, value, token string) error {
+func (r *Repo) SaveExtra(key string, value any, token string) error {
 	_, err := r.db.Exec(fmt.Sprintf("UPDATE requests SET extras = JSON_SET(IFNULL(extras, '{}'), '$.%s', ?) WHERE token = ?", key), value, token)
 	return err
 }
