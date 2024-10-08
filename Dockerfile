@@ -9,5 +9,5 @@ RUN CGO_ENABLED=0 GOOS=linux go build -o /worker
 FROM alpine:3.14 AS release
 WORKDIR /
 COPY --from=base-stage /worker /worker
-EXPOSE 3000
+EXPOSE 3004
 ENTRYPOINT [ "/worker" ]
