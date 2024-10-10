@@ -35,9 +35,9 @@ func main() {
 
 	app.Repo = r
 
-	app.Service1 = service1.New("http://localhost:3001", nil)
-	app.Service2 = service2.New("http://localhost:3002", nil)
-	app.Service3 = service3.New("http://localhost:3003", nil)
+	app.Service1 = service1.New(app.Config.URLService1.String(), nil)
+	app.Service2 = service2.New(app.Config.URLService2.String(), nil)
+	app.Service3 = service3.New(app.Config.URLService3.String(), nil)
 
 	app.Cron = cron.New()
 

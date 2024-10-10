@@ -2,6 +2,7 @@ package common
 
 import (
 	"fmt"
+	"net/url"
 	"strings"
 
 	"github.com/caarlos0/env/v11"
@@ -30,6 +31,10 @@ type Config struct {
 	WrkJobCron               string `env:"WRK_JOB_CRON" envDefault:"*/15 * * * *"`
 	WrkRequestNewCron        string `env:"WRK_REQUEST_NEW_CRON" envDefault:"*/5 * * * *"`
 	WrkRequestInProgressCron string `env:"WRK_REQUEST_INPROGRESS_CRON" envDefault:"*/1 * * * *"`
+
+	URLService1 url.URL `env:"URL_SERVICE1,notEmpty"`
+	URLService2 url.URL `env:"URL_SERVICE2,notEmpty"`
+	URLService3 url.URL `env:"URL_SERVICE3,notEmpty"`
 }
 
 func GetConfig() (*Config, error) {

@@ -14,6 +14,9 @@ func setEnvs() {
 	os.Setenv("DB_HOST", "DB_HOST")
 	os.Setenv("DB_PORT", "1")
 	os.Setenv("DB_NAME", "DB_NAME")
+	os.Setenv("URL_SERVICE1", "URL_SERVICE1")
+	os.Setenv("URL_SERVICE2", "URL_SERVICE2")
+	os.Setenv("URL_SERVICE3", "URL_SERVICE3")
 }
 
 func unsetEnvs() {
@@ -23,6 +26,9 @@ func unsetEnvs() {
 	os.Unsetenv("DB_HOST")
 	os.Unsetenv("DB_PORT")
 	os.Unsetenv("DB_NAME")
+	os.Unsetenv("URL_SERVICE1")
+	os.Unsetenv("URL_SERVICE2")
+	os.Unsetenv("URL_SERVICE3")
 }
 
 func TestConfig(t *testing.T) {
