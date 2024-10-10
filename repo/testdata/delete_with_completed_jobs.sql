@@ -2,10 +2,9 @@ TRUNCATE TABLE requests;
 TRUNCATE TABLE jobs;
 INSERT INTO `requests` (`token`, `request_token`, `action`, `params`, `extras`, `steps`, `step`, `status`, `created`, `completed`)
 VALUES
-	('test-token-1', 'auth-token-1', 'Delete', '{\"id\": 1}', '{\"email\": \"example_1@example.com\"}', '[{\"jobs\": [\"service1GetUser\"], \"name\": \"service1_retrieve_user\"}, {\"jobs\": [\"service1DeleteUser\", \"service2DeleteUser\", \"service3DeleteUser\"], \"name\": \"delete_user_accounts\"}]', 0, 1, '2024-10-03 15:25:00', NULL),
-	('test-token-2', 'auth-token-2', 'Delete', '{\"id\": 2}', '{\"email\": \"example_2@example.com\"}', '[{\"jobs\": [\"service1GetUser\"], \"name\": \"service1_retrieve_user\"}, {\"jobs\": [\"service1DeleteUser\", \"service2DeleteUser\", \"service3DeleteUser\"], \"name\": \"delete_user_accounts\"}]', 0, 1, '2024-10-03 15:25:00', NULL),
-	('test-token-3', 'auth-token-3', 'Delete', '{\"id\": 4}', '{}', '[{\"jobs\": [\"service1GetUser\"], \"name\": \"service1_retrieve_user\"}, {\"jobs\": [\"service1DeleteUser\", \"service2DeleteUser\", \"service3DeleteUser\"], \"name\": \"delete_user_accounts\"}]', 0, 6, '2024-09-28 14:17:01', NULL);
+	('039a4e90-107b-4d7f-97f7-e1ad84316119', 'auth-token-valid-1', 'delete', '{\"id\": 1}', '{\"email\": \"example_1@example.com\"}', '[{\"jobs\": [\"service1GetUser\"], \"name\": \"service1_retrieve_user\"}, {\"jobs\": [\"service1DeleteUser\", \"service2DeleteUser\", \"service3DeleteUser\"], \"name\": \"delete_user_accounts\"}]', 0, 1, '2024-10-09 16:04:53', NULL),
+	('f51d7890-8d28-4f9a-9803-6f2645c7d6c7', 'auth-token-valid-1', 'delete', '{\"id\": 100}', NULL, '[{\"jobs\": [\"service1GetUser\"], \"name\": \"service1_retrieve_user\"}, {\"jobs\": [\"service1DeleteUser\", \"service2DeleteUser\", \"service3DeleteUser\"], \"name\": \"delete_user_accounts\"}]', 0, 3, '2024-10-09 16:00:14', '2024-10-09 16:03:00');
 INSERT INTO `jobs` (`id`, `name`, `token`, `step`, `error`, `status`, `created`, `completed`)
 VALUES
-	(1, 'service1GetUser', 'test-token-1', 0, NULL, 2, '2024-10-01 13:14:33', '2024-10-03 15:25:00'),
-	(2, 'service1GetUser', 'test-token-2', 0, NULL, 2, '2024-10-01 13:14:33', '2024-10-03 15:25:00');
+	(1, 'service1GetUser', 'f51d7890-8d28-4f9a-9803-6f2645c7d6c7', 0, 'test error', 3, '2024-10-09 16:01:00', '2024-10-09 16:02:00'),
+	(2, 'service1GetUser', '039a4e90-107b-4d7f-97f7-e1ad84316119', 0, NULL, 2, '2024-10-09 16:05:00', '2024-10-09 16:06:00');

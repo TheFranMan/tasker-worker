@@ -3,7 +3,7 @@ module worker
 go 1.23.0
 
 require (
-	github.com/TheFranMan/tasker-common v0.0.0-20241004211807-274074b07171
+	github.com/TheFranMan/tasker-common v0.0.0-20241007120735-c752d18bccb9
 	github.com/caarlos0/env v3.5.0+incompatible
 	github.com/caarlos0/env/v11 v11.2.2
 	github.com/go-sql-driver/mysql v1.8.1

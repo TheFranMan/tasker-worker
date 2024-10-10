@@ -10,6 +10,8 @@ github.com/TheFranMan/tasker-common v0.0.0-20241004092338-ad95b8047256 h1:vpma5T
 github.com/TheFranMan/tasker-common v0.0.0-20241004092338-ad95b8047256/go.mod h1:xziSY4HYkZIgfV1Amop6GefD1DQ/1nICMc90broqTWA=
 github.com/TheFranMan/tasker-common v0.0.0-20241004211807-274074b07171 h1:upUB+EBC5ADaNlx7+YL9hEUw53PY5ha0BGRFaIW+ZcA=
 github.com/TheFranMan/tasker-common v0.0.0-20241004211807-274074b07171/go.mod h1:xziSY4HYkZIgfV1Amop6GefD1DQ/1nICMc90broqTWA=
+github.com/TheFranMan/tasker-common v0.0.0-20241007120735-c752d18bccb9 h1:k4zzIECDjcg3POaxR2GUeITc4qNxfxwXioeDNUPPklM=
+github.com/TheFranMan/tasker-common v0.0.0-20241007120735-c752d18bccb9/go.mod h1:xziSY4HYkZIgfV1Amop6GefD1DQ/1nICMc90broqTWA=
 github.com/caarlos0/env v3.5.0+incompatible h1:Yy0UN8o9Wtr/jGHZDpCBLpNrzcFLLM2yixi/rBrKyJs=
 github.com/caarlos0/env v3.5.0+incompatible/go.mod h1:tdCsowwCzMLdkqRYDlHpZCp2UooDD3MspDBjZ2AD02Y=
 github.com/caarlos0/env/v11 v11.2.2 h1:95fApNrUyueipoZN/EhA8mMxiNxrBwDa+oAZrMWl3Kg=

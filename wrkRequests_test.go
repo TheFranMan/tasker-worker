@@ -9,6 +9,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/TheFranMan/tasker-common/types"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database/mysql"
@@ -63,7 +64,7 @@ func (s *Suite) SetupSuite() {
 		s.FailNowf(err.Error(), "cannot create dockertest mysql s.resource")
 	}
 
-	s.resource.Expire(60 * 1)
+	s.resource.Expire(60 * 5)
 	mysqlPort := s.resource.GetPort("3306/tcp")
 
 	err = s.pool.Retry(func() error {
@@ -149,35 +150,35 @@ func (s *Suite) Test_if_the_request_is_new_insert_the_first_step_jobs_and_update
 	s.Require().Len(requests, 2)
 	s.Require().ElementsMatch([]repo.Request{
 		{
-			Token:  "test-token-1",
-			Action: "Delete",
+			Token:  "2b482d15-6c02-4e7f-bae3-0a8fe1dfb301",
+			Action: string(types.ActionDelete),
 			Step:   0,
-			Status: 1,
+			Status: int(repo.RequestStatusInProgress),
 		},
 		{
-			Token:  "test-token-2",
-			Action: "Delete",
+			Token:  "482a2d88-d38a-4509-ac94-beadff53c053",
+			Action: string(types.ActionDelete),
 			Step:   0,
-			Status: 1,
+			Status: int(repo.RequestStatusInProgress),
 		},
 	}, requests)
 
 	var jobs []repo.Job
-	err = s.db.Select(&jobs, "SELECT name, token, step, error, status FROM jobs")
+	err = s.db.Select(&jobs, `SELECT name, token, step, error, status FROM jobs WHERE token IN ("2b482d15-6c02-4e7f-bae3-0a8fe1dfb301", "482a2d88-d38a-4509-ac94-beadff53c053")`)
 	s.Require().Nil(err)
 
 	s.Require().Len(jobs, 2)
 	s.Require().ElementsMatch([]repo.Job{
 		{
 			Name:   "service1GetUser",
-			Token:  "test-token-1",
+			Token:  "2b482d15-6c02-4e7f-bae3-0a8fe1dfb301",
 			Step:   0,
 			Error:  sql.NullString{},
 			Status: 0,
 		},
 		{
 			Name:   "service1GetUser",
-			Token:  "test-token-2",
+			Token:  "482a2d88-d38a-4509-ac94-beadff53c053",
 			Step:   0,
 			Error:  sql.NullString{},
 			Status: 0,
@@ -188,7 +189,7 @@ func (s *Suite) Test_if_the_request_is_new_insert_the_first_step_jobs_and_update
 func (s *Suite) Test_if_the_request_has_an_errored_job_reinsert_the_job_and_do_not_update_the_request_status() {
 	s.importFile("delete_with_error_jobs.sql")
 
-	err := processNewRequests(&application.App{
+	err := processInProgressRequests(&application.App{
 		Repo: s.repo,
 	})
 	s.Require().Nil(err)
@@ -197,41 +198,25 @@ func (s *Suite) Test_if_the_request_has_an_errored_job_reinsert_the_job_and_do_n
 	err = s.db.Select(&requests, "SELECT token, action, step, status FROM requests WHERE status = 1")
 	s.Require().Nil(err)
 
-	s.Require().Len(requests, 2)
+	s.Require().Len(requests, 1)
 	s.Require().ElementsMatch([]repo.Request{
 		{
-			Token:  "test-token-1",
-			Action: "Delete",
+			Token:  "89858b95-21bd-47e3-a03e-9069a7440188",
+			Action: string(types.ActionDelete),
 			Step:   0,
-			Status: 1,
-		},
-		{
-			Token:  "test-token-2",
-			Action: "Delete",
-			Step:   0,
-			Status: 1,
+			Status: int(repo.RequestStatusInProgress),
 		},
 	}, requests)
 
 	var jobs []repo.Job
-	err = s.db.Select(&jobs, "SELECT name, token, step, error, status FROM jobs")
+	err = s.db.Select(&jobs, `SELECT name, token, step, error, status FROM jobs WHERE token = "89858b95-21bd-47e3-a03e-9069a7440188"`)
 	s.Require().Nil(err)
 
-	s.Require().Len(jobs, 4)
+	s.Require().Len(jobs, 2)
 	s.Require().ElementsMatch([]repo.Job{
 		{
 			Name:  "service1GetUser",
-			Token: "test-token-1",
-			Step:  0,
-			Error: sql.NullString{
-				Valid:  true,
-				String: "test error",
-			},
-			Status: 4,
-		},
-		{
-			Name:  "service1GetUser",
-			Token: "test-token-2",
+			Token: "89858b95-21bd-47e3-a03e-9069a7440188",
 			Step:  0,
 			Error: sql.NullString{
 				Valid:  true,
@@ -241,14 +226,7 @@ func (s *Suite) Test_if_the_request_has_an_errored_job_reinsert_the_job_and_do_n
 		},
 		{
 			Name:   "service1GetUser",
-			Token:  "test-token-1",
-			Step:   0,
-			Error:  sql.NullString{},
-			Status: 0,
-		},
-		{
-			Name:   "service1GetUser",
-			Token:  "test-token-2",
+			Token:  "89858b95-21bd-47e3-a03e-9069a7440188",
 			Step:   0,
 			Error:  sql.NullString{},
 			Status: 0,
@@ -268,47 +246,31 @@ func (s *Suite) Test_if_the_request_has_an_failed_job_exit_and_mark_the_request_
 	err = s.db.Select(&requests, "SELECT token, action, step, status FROM requests WHERE status = 3")
 	s.Require().Nil(err)
 
-	s.Require().Len(requests, 2)
+	s.Require().Len(requests, 1)
 	s.Require().ElementsMatch([]repo.Request{
 		{
-			Token:  "test-token-1",
-			Action: "Delete",
+			Token:  "c639b525-1ab1-44e6-bde3-96238cf13f2f",
+			Action: string(types.ActionDelete),
 			Step:   0,
-			Status: 3,
-		},
-		{
-			Token:  "test-token-2",
-			Action: "Delete",
-			Step:   0,
-			Status: 3,
+			Status: int(repo.RequestStatusFailed),
 		},
 	}, requests)
 
 	var jobs []repo.Job
-	err = s.db.Select(&jobs, "SELECT name, token, step, error, status FROM jobs")
+	err = s.db.Select(&jobs, `SELECT name, token, step, error, status FROM jobs WHERE token = "c639b525-1ab1-44e6-bde3-96238cf13f2f"`)
 	s.Require().Nil(err)
 
-	s.Require().Len(jobs, 2)
+	s.Require().Len(jobs, 1)
 	s.Require().ElementsMatch([]repo.Job{
 		{
 			Name:  "service1GetUser",
-			Token: "test-token-1",
+			Token: "c639b525-1ab1-44e6-bde3-96238cf13f2f",
 			Step:  0,
 			Error: sql.NullString{
 				Valid:  true,
 				String: "test error",
 			},
-			Status: 3,
-		},
-		{
-			Name:  "service1GetUser",
-			Token: "test-token-2",
-			Step:  0,
-			Error: sql.NullString{
-				Valid:  true,
-				String: "test error",
-			},
-			Status: 3,
+			Status: int(repo.JobStatusFailed),
 		},
 	}, jobs)
 }
@@ -325,90 +287,56 @@ func (s *Suite) Test_if_a_successfull_step_is_not_the_requests_last_step_increme
 	err = s.db.Select(&requests, "SELECT token, action, step, status FROM requests WHERE status = 1")
 	s.Require().Nil(err)
 
-	s.Require().Len(requests, 2)
+	s.Require().Len(requests, 1)
 	s.Require().ElementsMatch([]repo.Request{
 		{
-			Token:  "test-token-1",
-			Action: "Delete",
+			Token:  "039a4e90-107b-4d7f-97f7-e1ad84316119",
+			Action: string(types.ActionDelete),
 			Step:   1,
-			Status: 1,
-		},
-		{
-			Token:  "test-token-2",
-			Action: "Delete",
-			Step:   1,
-			Status: 1,
+			Status: int(repo.RequestStatusInProgress),
 		},
 	}, requests)
 
 	var jobs []repo.Job
-	err = s.db.Select(&jobs, "SELECT name, token, step, error, status FROM jobs")
+	err = s.db.Select(&jobs, `SELECT name, token, step, error, status FROM jobs WHERE token = "039a4e90-107b-4d7f-97f7-e1ad84316119"`)
 	s.Require().Nil(err)
 
-	s.Require().Len(jobs, 8)
+	s.Require().Len(jobs, 4)
 
 	s.Require().ElementsMatch([]repo.Job{
 		{
 			Name:   "service1GetUser",
-			Token:  "test-token-1",
+			Token:  "039a4e90-107b-4d7f-97f7-e1ad84316119",
 			Step:   0,
 			Error:  sql.NullString{},
-			Status: 2,
-		},
-		{
-			Name:   "service1GetUser",
-			Token:  "test-token-2",
-			Step:   0,
-			Error:  sql.NullString{},
-			Status: 2,
+			Status: int(repo.JobStatusCompleted),
 		},
 		{
 			Name:   "service1DeleteUser",
-			Token:  "test-token-1",
+			Token:  "039a4e90-107b-4d7f-97f7-e1ad84316119",
 			Step:   1,
 			Error:  sql.NullString{},
-			Status: 0,
+			Status: int(repo.JobStatusNew),
 		},
 		{
 			Name:   "service2DeleteUser",
-			Token:  "test-token-1",
+			Token:  "039a4e90-107b-4d7f-97f7-e1ad84316119",
 			Step:   1,
 			Error:  sql.NullString{},
-			Status: 0,
+			Status: int(repo.JobStatusNew),
 		},
 		{
 			Name:   "service3DeleteUser",
-			Token:  "test-token-1",
+			Token:  "039a4e90-107b-4d7f-97f7-e1ad84316119",
 			Step:   1,
 			Error:  sql.NullString{},
-			Status: 0,
-		},
-		{
-			Name:   "service1DeleteUser",
-			Token:  "test-token-2",
-			Step:   1,
-			Error:  sql.NullString{},
-			Status: 0,
-		},
-		{
-			Name:   "service2DeleteUser",
-			Token:  "test-token-2",
-			Step:   1,
-			Error:  sql.NullString{},
-			Status: 0,
-		},
-		{
-			Name:   "service3DeleteUser",
-			Token:  "test-token-2",
-			Step:   1,
-			Error:  sql.NullString{},
-			Status: 0,
+			Status: int(repo.JobStatusNew),
 		},
 	}, jobs)
 }
 
 func (s *Suite) Test_if_a_successfull_step_is_the_requests_last_step_update_the_requests_status_as_completed() {
-	s.importFile("update_email_with_completed_jobs.sql")
+	s.importFile("delete_with_completed_jobs_last_step.sql")
 
 	err := processInProgressRequests(&application.App{
 		Repo: s.repo,
@@ -419,70 +347,50 @@ func (s *Suite) Test_if_a_successfull_step_is_the_requests_last_step_update_the_
 	err = s.db.Select(&requests, "SELECT token, action, step, status FROM requests WHERE status = 2")
 	s.Require().Nil(err)
 
-	s.Require().Len(requests, 2)
+	s.Require().Len(requests, 1)
 	s.Require().ElementsMatch([]repo.Request{
 		{
-			Token:  "test-token-1",
-			Action: "update_email",
-			Step:   0,
-			Status: 2,
-		},
-		{
-			Token:  "test-token-2",
-			Action: "update_email",
-			Step:   0,
-			Status: 2,
+			Token:  "80498d81-8de4-41fb-b1a5-53180cd56d73",
+			Action: string(types.ActionDelete),
+			Step:   1,
+			Status: int(repo.RequestStatusCompleted),
 		},
 	}, requests)
 
 	var jobs []repo.Job
-	err = s.db.Select(&jobs, "SELECT name, token, step, error, status FROM jobs")
+	err = s.db.Select(&jobs, `SELECT name, token, step, error, status FROM jobs WHERE token = "80498d81-8de4-41fb-b1a5-53180cd56d73"`)
 	s.Require().Nil(err)
 
-	s.Require().Len(jobs, 6)
+	s.Require().Len(jobs, 4)
 
 	s.Require().ElementsMatch([]repo.Job{
 		{
-			Name:   "service1UpdateUser",
-			Token:  "test-token-1",
+			Name:   "service1GetUser",
+			Token:  "80498d81-8de4-41fb-b1a5-53180cd56d73",
 			Step:   0,
 			Error:  sql.NullString{},
-			Status: 2,
+			Status: int(repo.JobStatusCompleted),
 		},
 		{
-			Name:   "service2UpdateUser",
-			Token:  "test-token-1",
-			Step:   0,
+			Name:   "service1DeleteUser",
+			Token:  "80498d81-8de4-41fb-b1a5-53180cd56d73",
+			Step:   1,
 			Error:  sql.NullString{},
-			Status: 2,
+			Status: int(repo.JobStatusCompleted),
 		},
 		{
-			Name:   "service3UpdateUser",
-			Token:  "test-token-1",
-			Step:   0,
+			Name:   "service2DeleteUser",
+			Token:  "80498d81-8de4-41fb-b1a5-53180cd56d73",
+			Step:   1,
 			Error:  sql.NullString{},
-			Status: 2,
+			Status: int(repo.JobStatusCompleted),
 		},
 		{
-			Name:   "service1UpdateUser",
-			Token:  "test-token-2",
-			Step:   0,
+			Name:   "service3DeleteUser",
+			Token:  "80498d81-8de4-41fb-b1a5-53180cd56d73",
+			Step:   1,
 			Error:  sql.NullString{},
-			Status: 2,
-		},
-		{
-			Name:   "service2UpdateUser",
-			Token:  "test-token-2",
-			Step:   0,
-			Error:  sql.NullString{},
-			Status: 2,
-		},
-		{
-			Name:   "service3UpdateUser",
-			Token:  "test-token-2",
-			Step:   0,
-			Error:  sql.NullString{},
-			Status: 2,
+			Status: int(repo.JobStatusCompleted),
 		},
 	}, jobs)
 }
