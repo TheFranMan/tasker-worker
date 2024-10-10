@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"slices"
 	"time"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -254,7 +255,7 @@ func (r *Repo) updateRequestStatus(token string, status RequestStatus) error {
 	ub.Update("requests")
 	sets = append(sets, ub.Assign("status", status))
 
-	if RequestStatusCompleted == status {
+	if slices.Contains([]RequestStatus{RequestStatusCompleted, RequestStatusFailed}, status) {
 		sets = append(sets, "completed = NOW()")
 	}
 
