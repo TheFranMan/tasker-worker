@@ -3,10 +3,10 @@ package main
 import (
 	"fmt"
 
+	"github.com/TheFranMan/tasker-common/types"
 	log "github.com/sirupsen/logrus"
 
 	"worker/application"
-	"worker/repo"
 )
 
 func startRequestWrk(app *application.App) {
@@ -38,14 +38,14 @@ func processNewRequests(app *application.App) error {
 	}
 
 	for _, request := range requests {
-		jobs := []repo.Job{}
+		jobs := []types.Job{}
 		l := log.WithFields(log.Fields{
 			"token":  request.Token,
 			"action": request.Action,
 		})
 
 		for _, job := range request.Steps[0].Jobs {
-			jobs = append(jobs, repo.Job{
+			jobs = append(jobs, types.Job{
 				Token: request.Token,
 				Name:  job,
 				Step:  0,
@@ -87,20 +87,20 @@ func processInProgressRequests(app *application.App) error {
 			continue
 		}
 
-		retryJobs := []repo.Job{}
+		retryJobs := []types.Job{}
 		successCnt := 0
 
 		for _, job := range jobs {
 			l = l.WithField("name", job.Name)
 
 			// Job completed successfully, keep a count of these so we can check all of the request jobs completed successfully.
-			if repo.JobStatusCompleted == repo.JobStatus(job.Status) {
+			if types.JobStatusCompleted == types.JobStatus(job.Status) {
 				successCnt++
 				continue
 			}
 
 			// If job is failed, mark the request as failed and stop checking the rest of the jobs
-			if repo.JobStatusFailed == repo.JobStatus(job.Status) {
+			if types.JobStatusFailed == types.JobStatus(job.Status) {
 				err = app.Repo.MarkRequestFailed(job.Token)
 				if nil != err {
 					l.WithError(err).Error("cannot mark request as failed")
@@ -110,7 +110,7 @@ func processInProgressRequests(app *application.App) error {
 			}
 
 			//	If the job has an error, mark the job for reinsertion.
-			if repo.JobStatusRetry == repo.JobStatus(job.Status) {
+			if types.JobStatusRetry == types.JobStatus(job.Status) {
 				retryJobs = append(retryJobs, job)
 
 				continue
@@ -141,11 +141,11 @@ func processInProgressRequests(app *application.App) error {
 		}
 
 		// Insert the request's jobs from it's next step.
-		jobs = []repo.Job{}
+		jobs = []types.Job{}
 		nextStep := request.Step + 1
 
 		for _, job := range request.Steps[nextStep].Jobs {
-			jobs = append(jobs, repo.Job{
+			jobs = append(jobs, types.Job{
 				Token: request.Token,
 				Name:  job,
 				Step:  nextStep,

@@ -3,13 +3,12 @@ package jobs
 import (
 	"fmt"
 
-	"worker/application"
-	"worker/repo"
-
 	"github.com/TheFranMan/tasker-common/types"
+
+	"worker/application"
 )
 
-func Service1GetUser(app *application.App, request repo.Request) (types.Extras, error) {
+func Service1GetUser(app *application.App, request types.Request) (types.Extras, error) {
 	// Call external API
 	user, err := app.Service1.UserGet(request.Params.ID)
 	if nil != err {

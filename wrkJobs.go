@@ -8,37 +8,36 @@ import (
 
 	"worker/application"
 	"worker/jobs"
-	"worker/repo"
 )
 
-var callbacks = map[string]func(*application.App, repo.Request) (types.Extras, error){}
+var callbacks = map[string]func(*application.App, types.Request) (types.Extras, error){}
 
 func init() {
-	callbacks["service1GetUser"] = func(app *application.App, request repo.Request) (types.Extras, error) {
+	callbacks["service1GetUser"] = func(app *application.App, request types.Request) (types.Extras, error) {
 		return jobs.Service1GetUser(app, request)
 	}
 
-	callbacks["service1DeleteUser"] = func(app *application.App, request repo.Request) (types.Extras, error) {
+	callbacks["service1DeleteUser"] = func(app *application.App, request types.Request) (types.Extras, error) {
 		return jobs.Service1DeleteUser(app, request)
 	}
 
-	callbacks["service2DeleteUser"] = func(app *application.App, request repo.Request) (types.Extras, error) {
+	callbacks["service2DeleteUser"] = func(app *application.App, request types.Request) (types.Extras, error) {
 		return jobs.Service2DeleteUser(app, request)
 	}
 
-	callbacks["service3DeleteUser"] = func(app *application.App, request repo.Request) (types.Extras, error) {
+	callbacks["service3DeleteUser"] = func(app *application.App, request types.Request) (types.Extras, error) {
 		return jobs.Service3DeleteUser(app, request)
 	}
 
-	callbacks["service1UpdateUser"] = func(app *application.App, request repo.Request) (types.Extras, error) {
+	callbacks["service1UpdateUser"] = func(app *application.App, request types.Request) (types.Extras, error) {
 		return jobs.Service1UpdateUser(app, request)
 	}
 
-	callbacks["service2UpdateUser"] = func(app *application.App, request repo.Request) (types.Extras, error) {
+	callbacks["service2UpdateUser"] = func(app *application.App, request types.Request) (types.Extras, error) {
 		return jobs.Service2UpdateUser(app, request)
 	}
 
-	callbacks["service3UpdateUser"] = func(app *application.App, request repo.Request) (types.Extras, error) {
+	callbacks["service3UpdateUser"] = func(app *application.App, request types.Request) (types.Extras, error) {
 		return jobs.Service3UpdateUser(app, request)
 	}
 }

@@ -143,32 +143,32 @@ func (s *Suite) Test_if_the_request_is_new_insert_the_first_step_jobs_and_update
 	})
 	s.Require().Nil(err)
 
-	var requests []repo.Request
+	var requests []types.Request
 	err = s.db.Select(&requests, "SELECT token, action, step, status FROM requests WHERE status = 1")
 	s.Require().Nil(err)
 
 	s.Require().Len(requests, 2)
-	s.Require().ElementsMatch([]repo.Request{
+	s.Require().ElementsMatch([]types.Request{
 		{
 			Token:  "2b482d15-6c02-4e7f-bae3-0a8fe1dfb301",
 			Action: string(types.ActionDelete),
 			Step:   0,
-			Status: int(repo.RequestStatusInProgress),
+			Status: int(types.RequestStatusInProgress),
 		},
 		{
 			Token:  "482a2d88-d38a-4509-ac94-beadff53c053",
 			Action: string(types.ActionDelete),
 			Step:   0,
-			Status: int(repo.RequestStatusInProgress),
+			Status: int(types.RequestStatusInProgress),
 		},
 	}, requests)
 
-	var jobs []repo.Job
+	var jobs []types.Job
 	err = s.db.Select(&jobs, `SELECT name, token, step, error, status FROM jobs WHERE token IN ("2b482d15-6c02-4e7f-bae3-0a8fe1dfb301", "482a2d88-d38a-4509-ac94-beadff53c053")`)
 	s.Require().Nil(err)
 
 	s.Require().Len(jobs, 2)
-	s.Require().ElementsMatch([]repo.Job{
+	s.Require().ElementsMatch([]types.Job{
 		{
 			Name:   "service1GetUser",
 			Token:  "2b482d15-6c02-4e7f-bae3-0a8fe1dfb301",
@@ -194,26 +194,26 @@ func (s *Suite) Test_if_the_request_has_an_errored_job_reinsert_the_job_and_do_n
 	})
 	s.Require().Nil(err)
 
-	var requests []repo.Request
+	var requests []types.Request
 	err = s.db.Select(&requests, "SELECT token, action, step, status FROM requests WHERE status = 1")
 	s.Require().Nil(err)
 
 	s.Require().Len(requests, 1)
-	s.Require().ElementsMatch([]repo.Request{
+	s.Require().ElementsMatch([]types.Request{
 		{
 			Token:  "89858b95-21bd-47e3-a03e-9069a7440188",
 			Action: string(types.ActionDelete),
 			Step:   0,
-			Status: int(repo.RequestStatusInProgress),
+			Status: int(types.RequestStatusInProgress),
 		},
 	}, requests)
 
-	var jobs []repo.Job
+	var jobs []types.Job
 	err = s.db.Select(&jobs, `SELECT name, token, step, error, status FROM jobs WHERE token = "89858b95-21bd-47e3-a03e-9069a7440188"`)
 	s.Require().Nil(err)
 
 	s.Require().Len(jobs, 2)
-	s.Require().ElementsMatch([]repo.Job{
+	s.Require().ElementsMatch([]types.Job{
 		{
 			Name:  "service1GetUser",
 			Token: "89858b95-21bd-47e3-a03e-9069a7440188",
@@ -242,26 +242,26 @@ func (s *Suite) Test_if_the_request_has_an_failed_job_exit_and_mark_the_request_
 	})
 	s.Require().Nil(err)
 
-	var requests []repo.Request
+	var requests []types.Request
 	err = s.db.Select(&requests, "SELECT token, action, step, status FROM requests WHERE status = 3")
 	s.Require().Nil(err)
 
 	s.Require().Len(requests, 1)
-	s.Require().ElementsMatch([]repo.Request{
+	s.Require().ElementsMatch([]types.Request{
 		{
 			Token:  "c639b525-1ab1-44e6-bde3-96238cf13f2f",
 			Action: string(types.ActionDelete),
 			Step:   0,
-			Status: int(repo.RequestStatusFailed),
+			Status: int(types.RequestStatusFailed),
 		},
 	}, requests)
 
-	var jobs []repo.Job
+	var jobs []types.Job
 	err = s.db.Select(&jobs, `SELECT name, token, step, error, status FROM jobs WHERE token = "c639b525-1ab1-44e6-bde3-96238cf13f2f"`)
 	s.Require().Nil(err)
 
 	s.Require().Len(jobs, 1)
-	s.Require().ElementsMatch([]repo.Job{
+	s.Require().ElementsMatch([]types.Job{
 		{
 			Name:  "service1GetUser",
 			Token: "c639b525-1ab1-44e6-bde3-96238cf13f2f",
@@ -270,7 +270,7 @@ func (s *Suite) Test_if_the_request_has_an_failed_job_exit_and_mark_the_request_
 				Valid:  true,
 				String: "test error",
 			},
-			Status: int(repo.JobStatusFailed),
+			Status: int(types.JobStatusFailed),
 		},
 	}, jobs)
 }
@@ -283,54 +283,54 @@ func (s *Suite) Test_if_a_successfull_step_is_not_the_requests_last_step_increme
 	})
 	s.Require().Nil(err)
 
-	var requests []repo.Request
+	var requests []types.Request
 	err = s.db.Select(&requests, "SELECT token, action, step, status FROM requests WHERE status = 1")
 	s.Require().Nil(err)
 
 	s.Require().Len(requests, 1)
-	s.Require().ElementsMatch([]repo.Request{
+	s.Require().ElementsMatch([]types.Request{
 		{
 			Token:  "039a4e90-107b-4d7f-97f7-e1ad84316119",
 			Action: string(types.ActionDelete),
 			Step:   1,
-			Status: int(repo.RequestStatusInProgress),
+			Status: int(types.RequestStatusInProgress),
 		},
 	}, requests)
 
-	var jobs []repo.Job
+	var jobs []types.Job
 	err = s.db.Select(&jobs, `SELECT name, token, step, error, status FROM jobs WHERE token = "039a4e90-107b-4d7f-97f7-e1ad84316119"`)
 	s.Require().Nil(err)
 
 	s.Require().Len(jobs, 4)
 
-	s.Require().ElementsMatch([]repo.Job{
+	s.Require().ElementsMatch([]types.Job{
 		{
 			Name:   "service1GetUser",
 			Token:  "039a4e90-107b-4d7f-97f7-e1ad84316119",
 			Step:   0,
 			Error:  sql.NullString{},
-			Status: int(repo.JobStatusCompleted),
+			Status: int(types.JobStatusCompleted),
 		},
 		{
 			Name:   "service1DeleteUser",
 			Token:  "039a4e90-107b-4d7f-97f7-e1ad84316119",
 			Step:   1,
 			Error:  sql.NullString{},
-			Status: int(repo.JobStatusNew),
+			Status: int(types.JobStatusNew),
 		},
 		{
 			Name:   "service2DeleteUser",
 			Token:  "039a4e90-107b-4d7f-97f7-e1ad84316119",
 			Step:   1,
 			Error:  sql.NullString{},
-			Status: int(repo.JobStatusNew),
+			Status: int(types.JobStatusNew),
 		},
 		{
 			Name:   "service3DeleteUser",
 			Token:  "039a4e90-107b-4d7f-97f7-e1ad84316119",
 			Step:   1,
 			Error:  sql.NullString{},
-			Status: int(repo.JobStatusNew),
+			Status: int(types.JobStatusNew),
 		},
 	}, jobs)
 }
@@ -343,54 +343,54 @@ func (s *Suite) Test_if_a_successfull_step_is_the_requests_last_step_update_the_
 	})
 	s.Require().Nil(err)
 
-	var requests []repo.Request
+	var requests []types.Request
 	err = s.db.Select(&requests, "SELECT token, action, step, status FROM requests WHERE status = 2")
 	s.Require().Nil(err)
 
 	s.Require().Len(requests, 1)
-	s.Require().ElementsMatch([]repo.Request{
+	s.Require().ElementsMatch([]types.Request{
 		{
 			Token:  "80498d81-8de4-41fb-b1a5-53180cd56d73",
 			Action: string(types.ActionDelete),
 			Step:   1,
-			Status: int(repo.RequestStatusCompleted),
+			Status: int(types.RequestStatusCompleted),
 		},
 	}, requests)
 
-	var jobs []repo.Job
+	var jobs []types.Job
 	err = s.db.Select(&jobs, `SELECT name, token, step, error, status FROM jobs WHERE token = "80498d81-8de4-41fb-b1a5-53180cd56d73"`)
 	s.Require().Nil(err)
 
 	s.Require().Len(jobs, 4)
 
-	s.Require().ElementsMatch([]repo.Job{
+	s.Require().ElementsMatch([]types.Job{
 		{
 			Name:   "service1GetUser",
 			Token:  "80498d81-8de4-41fb-b1a5-53180cd56d73",
 			Step:   0,
 			Error:  sql.NullString{},
-			Status: int(repo.JobStatusCompleted),
+			Status: int(types.JobStatusCompleted),
 		},
 		{
 			Name:   "service1DeleteUser",
 			Token:  "80498d81-8de4-41fb-b1a5-53180cd56d73",
 			Step:   1,
 			Error:  sql.NullString{},
-			Status: int(repo.JobStatusCompleted),
+			Status: int(types.JobStatusCompleted),
 		},
 		{
 			Name:   "service2DeleteUser",
 			Token:  "80498d81-8de4-41fb-b1a5-53180cd56d73",
 			Step:   1,
 			Error:  sql.NullString{},
-			Status: int(repo.JobStatusCompleted),
+			Status: int(types.JobStatusCompleted),
 		},
 		{
 			Name:   "service3DeleteUser",
 			Token:  "80498d81-8de4-41fb-b1a5-53180cd56d73",
 			Step:   1,
 			Error:  sql.NullString{},
-			Status: int(repo.JobStatusCompleted),
+			Status: int(types.JobStatusCompleted),
 		},
 	}, jobs)
 }

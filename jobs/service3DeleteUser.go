@@ -8,10 +8,9 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"worker/application"
-	"worker/repo"
 )
 
-func Service3DeleteUser(app *application.App, request repo.Request) (types.Extras, error) {
+func Service3DeleteUser(app *application.App, request types.Request) (types.Extras, error) {
 	var extras map[string]any
 	err := json.Unmarshal([]byte(request.Extras.String), &extras)
 	if nil != err {

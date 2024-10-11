@@ -7,10 +7,9 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"worker/application"
-	"worker/repo"
 )
 
-func Service1UpdateUser(app *application.App, request repo.Request) (types.Extras, error) {
+func Service1UpdateUser(app *application.App, request types.Request) (types.Extras, error) {
 	err := app.Service1.UpdateUser(request.Params.ID, request.Params.Email)
 	if nil != err {
 		log.WithField("id", request.Params.ID).WithError(err).Error("cannot update user email from service 1")

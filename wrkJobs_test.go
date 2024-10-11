@@ -4,11 +4,11 @@ package main
 
 import (
 	"database/sql"
-	"worker/application"
-	"worker/repo"
-	"worker/service1"
 
 	"github.com/TheFranMan/tasker-common/types"
+
+	"worker/application"
+	"worker/service1"
 )
 
 func (s *Suite) Test_jobs_can_update_their_request_extras_column() {
@@ -25,12 +25,12 @@ func (s *Suite) Test_jobs_can_update_their_request_extras_column() {
 	})
 	s.Require().Nil(err)
 
-	var requests []repo.Request
+	var requests []types.Request
 	err = s.db.Select(&requests, "SELECT token, action, extras, step, status FROM requests WHERE status = 1")
 	s.Require().Nil(err)
 
 	s.Require().Len(requests, 1)
-	s.Require().ElementsMatch([]repo.Request{
+	s.Require().ElementsMatch([]types.Request{
 		{
 			Token:  "482a2d88-d38a-4509-ac94-beadff53c053",
 			Action: string(types.ActionDelete),
