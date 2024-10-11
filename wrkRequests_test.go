@@ -13,7 +13,7 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database/mysql"
-	_ "github.com/golang-migrate/migrate/v4/source/file"
+	_ "github.com/golang-migrate/migrate/v4/source/github"
 	"github.com/jmoiron/sqlx"
 	"github.com/ory/dockertest"
 	"github.com/ory/dockertest/docker"
@@ -87,7 +87,7 @@ func (s *Suite) SetupSuite() {
 	}
 
 	m, err := migrate.NewWithDatabaseInstance(
-		"file://migrations",
+		"github://TheFranMan/tasker-common/migrations",
 		"mysql",
 		driver,
 	)
