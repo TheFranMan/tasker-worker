@@ -1,7 +1,6 @@
 package server
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -13,10 +12,7 @@ type Server struct {
 
 func NewServer() *Server {
 	r := mux.NewRouter()
-	r.HandleFunc("/status", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Add("content-type", "application/json")
-		fmt.Fprint(w, `{"status": "OK"}`)
-	})
+	r.HandleFunc("/heartbeat", func(w http.ResponseWriter, r *http.Request) {})
 
 	return &Server{
 		router: r,
