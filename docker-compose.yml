@@ -15,6 +15,7 @@ services:
       - 3307:3306
     volumes:
       - db:/var/lib/mysql
+
   worker:
     build: .
     container_name: worker
