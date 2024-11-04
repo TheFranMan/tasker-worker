@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 type Server struct {
@@ -13,6 +14,7 @@ type Server struct {
 func NewServer() *Server {
 	r := mux.NewRouter()
 	r.HandleFunc("/heartbeat", func(w http.ResponseWriter, r *http.Request) {})
+	r.Handle("/metrics", promhttp.Handler())
 
 	return &Server{
 		router: r,
