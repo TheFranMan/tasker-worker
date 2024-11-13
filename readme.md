@@ -44,7 +44,7 @@ In the project root, first create a `.env` file with the below env vars, then ru
 
 
 To run the project separate from Docker, and so avaoiding the Docker build step, from the project root follow the below steps:
-   1. `docker compose up -p`.
+   1. `docker compose up`.
    2. `docker compose stop worker`.
    3. `go get && go build && ./worker`
 
